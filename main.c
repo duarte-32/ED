@@ -15,6 +15,20 @@ int main(){
 		printf("| 5.Registar Passagem   |\n");
 		printf("-------------------------\n");
 		scanf("%d",&op);
+		switch(op){
+			case 1:
+				break;
+			case 2:
+				break;
+			case 3:
+				break;
+			case 4:
+				break;
+			case 5:
+				break;
+			default:
+				break;
+		}
 	}while(op !=0);
 	printf("Programa fechado. \n");
 	return EXIT_SUCCESS;
