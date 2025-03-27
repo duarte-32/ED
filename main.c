@@ -27,6 +27,7 @@ int main(){
 			case 5:
 				break;
 			default:
+				printf("Opção inválida!\n");
 				break;
 		}
 	}while(op !=0);
