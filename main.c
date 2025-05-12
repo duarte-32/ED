@@ -1,17 +1,29 @@
-#include <stdio.h>
+#include "structs.h"
 #include <locale.h>
-#include <stdlib.h>
+
+// Listas vazias
+Dono *donos = NULL;
+Veiculo *veiculos = NULL;
+Sensor *sensores = NULL;
+Distancia *distancias = NULL;
+Passagem *passagens = NULL;
+
+int numDonos = 0;
+int numVeiculos = 0;
+int numSensores = 0;
+int numDistancias = 0;
+int numPassagens = 0;
 
 int main(){
-	setlocale(LC_ALL,"Portuguese");
 	int op;
-	printf("Bem vindo!\n");
+	setlocale(LC_ALL, "Portuguese");
 	do{
+		printf("******VIA VERMELHA******");
 		printf("\n-------------------------\n");
 		printf("| 1.Registar Dono       |\n");
 		printf("| 2.Listar Donos        |\n");
-		printf("| 3.Registar Veículo    |\n");
-		printf("| 4.Listar Veículos     |\n");
+		printf("| 3.Registar Veiculo    |\n");
+		printf("| 4.Listar Veiculos     |\n");
 		printf("| 5.Registar Passagem   |\n");
 		printf("-------------------------\n");
 		scanf("%d",&op);
@@ -32,5 +44,5 @@ int main(){
 		}
 	}while(op !=0);
 	printf("Programa fechado. \n");
-	return EXIT_SUCCESS;
+	return 0;
 }

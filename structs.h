@@ -1,3 +1,6 @@
+#ifndef STRUCTS_H
+#define STRUCTS_H
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -38,15 +41,6 @@ typedef struct {
     int tipoRegisto; // 0=entrada, 1=saída
 } Passagem;
 
-// Listas vazias
-Dono *donos = NULL;
-Veiculo *veiculos = NULL;
-Sensor *sensores = NULL;
-Distancia *distancias = NULL;
-Passagem *passagens = NULL;
 
-int numDonos = 0;
-int numVeiculos = 0;
-int numSensores = 0;
-int numDistancias = 0;
-int numPassagens = 0;
+
+#endif
