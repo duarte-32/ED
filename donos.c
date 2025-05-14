@@ -30,8 +30,6 @@ void CarregarDonos(const char* arquivo) {
                 continue;
             }
 
-            // Limpa espaços extras no nome (se necessário)
-            //nova->nome[strcspn(nova->nome, " \t\n")] = 0;
 
             nova->prox = NULL;
 
