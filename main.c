@@ -1,3 +1,4 @@
+
 #include "structs.h"
 #include <locale.h>
 
@@ -8,6 +9,36 @@ extern Sensor *sensores;
 extern Distancia *distancias;
 extern Passagem *passagens;
 
+void listarDonoSubmenu(){
+    int opcao;
+
+    do{
+        printf("\n--- Submenu Listar Dono ---\n");
+        printf("| 1. Listar Donos                 |\n");
+        printf("| 2. Listar por ordem Alfabética  |\n");
+        printf("| 0. Voltar ao menu principal     |\n");
+        printf("Escolha uma opção:\n");
+        scanf("%d", &opcao);
+
+        switch(opcao){
+            case 1:
+                ListarDonos();
+                break;
+
+            case 2:
+                listarCondutoresOrdemAlfa(donos);
+                break;
+            case 0:
+                printf("Voltar ao menu principal.\n");
+                break;
+            default:
+                printf("Opção inválida!\n");
+
+        }
+    }while(opcao != 0);
+
+    return 0;
+}
 
 
 int main(){
@@ -35,7 +66,7 @@ int main(){
 				// RegistarDono();
 				break;
 			case 2:
-				ListarDonos();
+				listarDonoSubmenu();
 				break;
 			case 3:
 				// RegistarVeiculo();
