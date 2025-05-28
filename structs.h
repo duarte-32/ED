@@ -50,6 +50,8 @@ typedef struct Passagem {
 
 void CarregarDonos(const char* arquivo);
 void ListarDonos();
+int compararNomes (const void* a, const void* b);
+void listarCondutoresOrdemAlfa(Dono* listaDonos);
 void CarregarVeiculos(const char* arquivo);
 void ListarVeiculos();
 void CarregarSensores(const char* arquivo);
