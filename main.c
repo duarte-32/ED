@@ -9,6 +9,44 @@ extern Sensor *sensores;
 extern Distancia *distancias;
 extern Passagem *passagens;
 
+size_t calcularMemoriaTotal(Dono* donos, Veiculo* veiculos, Sensor* sensores, Distancia* distancias, Passagem* passagens){
+    size_t total = 0;
+
+    Dono* d = donos;
+    while(d != NULL){
+        total += sizeof(Dono);
+        d = d->prox;
+    }
+
+    Veiculo* v = veiculos;
+    while(v != NULL){
+        total += sizeof(Veiculo);
+        v = v->prox;
+    }
+
+    Sensor* s = sensores;
+    while(d != NULL){
+         total += sizeof(Sensor);
+        s = s->prox;
+    }
+
+    // Distancias
+    Distancia* dist = distancias;
+    while (dist != NULL) {
+        total += sizeof(Distancia);
+        dist = dist->prox;
+    }
+
+    // Passagens
+    Passagem* p = passagens;
+    while (p != NULL) {
+        total += sizeof(Passagem);
+        p = p->prox;
+    }
+
+    return total;
+}
+
 void listarDonoSubmenu(){
     int opcao;
 
@@ -53,13 +91,14 @@ int main(){
 	do{
 		printf("******VIA VERMELHA******");
 		printf("\n-------------------------\n");
-		printf("| 1.Registar Dono       |\n");
-		printf("| 2.Listar Donos        |\n");
-		printf("| 3.Registar Veiculo    |\n");
-		printf("| 4.Listar Veiculos     |\n");
-		printf("| 5.Registar Passagem   |\n");
-		printf("| 0.Sair do Programa    |\n");
-		printf("-------------------------\n");
+		printf("| 1.Registar Dono           |\n");
+		printf("| 2.Listar Donos            |\n");
+		printf("| 3.Registar Veiculo        |\n");
+		printf("| 4.Listar Veiculos         |\n");
+		printf("| 5.Registar Passagem       |\n");
+		printf("| 6.Memoria Total Ocupada   |\n");
+		printf("| 0.Sair do Programa        |\n");
+		printf("----------------------------\n");
 		scanf("%d",&op);
 		switch(op){
 			case 1:
@@ -77,6 +116,11 @@ int main(){
 			case 5:
 				// RegisarPassagem();
 				break;
+            case 6:{
+                size_t memoriaTotal = calcularMemoriaTotal(donos, veiculos, sensores, distancias, passagens);
+                printf("Memória total ocupada pelas estruturas de dados: %zu bytes\n", memoriaTotal);
+                break;
+            }
 			case 0:
 				break;
 			default:
