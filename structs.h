@@ -46,6 +46,7 @@ typedef struct Passagem {
     struct Passagem* prox;
 } Passagem;
 
+size_t calcularMemoriaTotal(Dono* donos, Veiculo* veiculos, Sensor* sensores, Distancia* distancias, Passagem* passagens);
 
 
 void CarregarDonos(const char* arquivo);
