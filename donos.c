@@ -1,3 +1,4 @@
+
 #include "structs.h"
 
 Dono *donos = NULL;
@@ -120,4 +121,45 @@ void listarCondutoresOrdemAlfa(Dono* listaDonos){
     }
 
     free(nomes); //Libertar memória do array
+}
+
+int compararContribuintes(const void* a, const void* b){
+    Dono* da = *(Dono**)a;
+    Dono* db = *(Dono**)b;
+    return da->numContribuinte - db->numContribuinte;
+}
+
+void listarCondutoresPorContribuinte(Dono* listaDonos){
+    if (listaDonos == NULL) {
+        printf("Lista de donos está vazia.\n");
+        return;
+    }
+
+    int count = 0;
+    Dono* temp = listaDonos;
+    while (temp != NULL) {
+        count++;
+        temp = temp->prox;
+    }
+
+    Dono** arrayDonos = malloc(count * sizeof(Dono*));
+    if (arrayDonos == NULL) {
+        printf("Erro de alocação de memória.\n");
+        return;
+    }
+
+    temp = listaDonos;
+    for (int i = 0; i < count; i++) {
+        arrayDonos[i] = temp;
+        temp = temp->prox;
+    }
+
+    qsort(arrayDonos, count, sizeof(Dono*), compararContribuintes);
+
+    printf("\n--- Condutores ordenados por Número de Contribuinte ---\n");
+    for (int i = 0; i < count; i++) {
+        printf("NIF: %d | Nome: %s\n", arrayDonos[i]->numContribuinte, arrayDonos[i]->nome);
+    }
+
+    free(arrayDonos);
 }
