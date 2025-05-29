@@ -48,3 +48,40 @@ void ListarVeiculos() {
         atual = atual->prox;
     }
 }
+
+int proximoCodVeiculo(){
+    int max=0;
+    Veiculo* v = veiculos;
+    while(v){
+        if(v->codVeiculo > max)
+            max = v->codVeiculo;
+        v = v->prox;
+    }
+    return max + 1;
+}
+
+void registarVeiculos(){
+    Veiculo* novo = malloc(sizeof(Veiculo));
+    if(!novo){
+        printf("Erro ao alocar memória.\n");
+        return;
+    }
+
+    printf("Matrícula: ");
+    scanf("%s", novo->matricula);
+    printf("Marca: ");
+    scanf("%s", novo->marca);
+    printf("Modelo: ");
+    scanf("%s", novo->modelo);
+    printf("Ano: ");
+    scanf("%d", &novo->ano);
+    printf("NIF do Dono: ");
+    scanf("%d", &novo->dono);
+
+    novo->codVeiculo = proximoCodVeiculo;
+
+    novo->prox = veiculos;
+    veiculos = novo;
+
+    printf("Veículo registado com sucesso! Código: %d\n", novo->codVeiculo);
+}
