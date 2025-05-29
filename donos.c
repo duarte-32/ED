@@ -61,6 +61,27 @@ void ListarDonos() {
     }
 }
 
+void registarDono(){
+    Dono* novo = malloc(sizeof(Dono));
+    if(!novo){
+        printf("Erro de alocação de memória.\n");
+        return;
+    }
+
+    printf("Número de Contribuinte: ");
+    scanf("%d", &novo->numContribuinte);
+    getchar(); //Limpar buffer
+
+    printf("Nome: ");
+    fgets(novo->nome, sizeof(novo->nome), stdin);
+    novo->nome[strcspn(novo->nome, "\n")] = '\0'; //Remover \n
+
+    novo->prox = donos;
+    donos = novo;
+
+    printf("Dono registado com sucesso.\n");
+}
+
 int compararNomes (const void* a, const void* b){
     char* nomeA = *(char**)a;
     char* nomeB = *(char**)b;
