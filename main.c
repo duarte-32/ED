@@ -102,25 +102,25 @@ int main(){
 		scanf("%d",&op);
 		switch(op){
 			case 1:
-				// RegistarDono();
+				registarDono();
 				break;
 			case 2:
 				listarDonoSubmenu();
 				break;
 			case 3:
-				// RegistarVeiculo();
+				registarVeiculos();
 				break;
 			case 4:
 				ListarVeiculos();
 				break;
 			case 5:
-				// RegisarPassagem();
+				registarPassagem();
 				break;
-            case 6:{
-                size_t memoriaTotal = calcularMemoriaTotal(donos, veiculos, sensores, distancias, passagens);
-                printf("Memória total ocupada pelas estruturas de dados: %zu bytes\n", memoriaTotal);
-                break;
-            }
+            		case 6:{
+                		size_t memoriaTotal = calcularMemoriaTotal(donos, veiculos, sensores, distancias, passagens);
+                		printf("Memória total ocupada pelas estruturas de dados: %zu bytes\n", memoriaTotal);
+               			break;
+           		 }
 			case 0:
 				break;
 			default:
