@@ -46,18 +46,26 @@ typedef struct Passagem {
     struct Passagem* prox;
 } Passagem;
 
-size_t calcularMemoriaTotal(Dono* donos, Veiculo* veiculos, Sensor* sensores, Distancia* distancias, Passagem* passagens);
 
+size_t calcularMemoriaTotal(Dono* donos, Veiculo* veiculos, Sensor* sensores, Distancia* distancias, Passagem* passagens);
+void listarDonoSubmenu();
+void listarVeiculoSubmenu();
 
 void CarregarDonos(const char* arquivo);
 void ListarDonos();
 void registarDono();
 int compararNomes (const void* a, const void* b);
 void listarCondutoresOrdemAlfa(Dono* listaDonos);
+int compararContribuintes(const void* a, const void* b);
+void listarCondutoresPorContribuinte(Dono* listaDonos);
 void CarregarVeiculos(const char* arquivo);
 void ListarVeiculos();
 int proximoCodVeiculo();
 void registarVeiculos();
+int compararPorMatricula(const void* a, const void* b);
+int compararPorMarca(const void* a, const void* b);
+int compararPorModelo(const void* a, const void* b);
+void listarVeiculosOrdenados(Veiculo* listaVeiculos, int criterio);
 void CarregarSensores(const char* arquivo);
 void CarregarDistancias(const char* arquivo);
 void CarregarPassagens(const char* arquivo);
