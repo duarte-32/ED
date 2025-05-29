@@ -1,3 +1,4 @@
+
 #include "structs.h"
 
 Veiculo* veiculos = NULL;
@@ -85,3 +86,71 @@ void registarVeiculos(){
 
     printf("Veículo registado com sucesso! Código: %d\n", novo->codVeiculo);
 }
+
+
+int compararPorMatricula(const void* a, const void* b) {
+    return strcmp((*(Veiculo**)a)->matricula, (*(Veiculo**)b)->matricula);
+}
+
+int compararPorMarca(const void* a, const void* b) {
+    return strcmp((*(Veiculo**)a)->marca, (*(Veiculo**)b)->marca);
+}
+
+int compararPorModelo(const void* a, const void* b) {
+    return strcmp((*(Veiculo**)a)->modelo, (*(Veiculo**)b)->modelo);
+}
+
+void listarVeiculosOrdenados(Veiculo* listaVeiculos, int criterio) {
+    if (listaVeiculos == NULL) {
+        printf("Lista de veículos está vazia.\n");
+        return;
+    }
+
+    int count = 0;
+    Veiculo* temp = listaVeiculos;
+    while (temp) {
+        count++;
+        temp = temp->prox;
+    }
+
+    Veiculo** array = malloc(count * sizeof(Veiculo*));
+    if (!array) {
+        printf("Erro de alocação de memória.\n");
+        return;
+    }
+
+    temp = listaVeiculos;
+    for (int i = 0; i < count; i++) {
+        array[i] = temp;
+        temp = temp->prox;
+    }
+
+    switch (criterio) {
+        case 1:
+            qsort(array, count, sizeof(Veiculo*), compararPorMatricula);
+            printf("\n--- Veículos ordenados por Matrícula ---\n");
+            break;
+        case 2:
+            qsort(array, count, sizeof(Veiculo*), compararPorMarca);
+            printf("\n--- Veículos ordenados por Marca ---\n");
+            break;
+        case 3:
+            qsort(array, count, sizeof(Veiculo*), compararPorModelo);
+            printf("\n--- Veículos ordenados por Modelo ---\n");
+            break;
+        default:
+            printf("Critério de ordenação inválido.\n");
+            free(array);
+            return;
+    }
+
+    for (int i = 0; i < count; i++) {
+        printf("Matrícula: %s | Marca: %s | Modelo: %s\n",
+            array[i]->matricula,
+            array[i]->marca,
+            array[i]->modelo);
+    }
+
+    free(array);
+}
+
