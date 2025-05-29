@@ -51,15 +51,16 @@ size_t calcularMemoriaTotal(Dono* donos, Veiculo* veiculos, Sensor* sensores, Di
 
 void CarregarDonos(const char* arquivo);
 void ListarDonos();
+void registarDono();
 int compararNomes (const void* a, const void* b);
 void listarCondutoresOrdemAlfa(Dono* listaDonos);
 void CarregarVeiculos(const char* arquivo);
 void ListarVeiculos();
+int proximoCodVeiculo();
+void registarVeiculos();
 void CarregarSensores(const char* arquivo);
-void ListarSensores();
 void CarregarDistancias(const char* arquivo);
-void ListarDistancias();
 void CarregarPassagens(const char* arquivo);
-void ListarPassagens();
+void registarPassagem();
 
 #endif
