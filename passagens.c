@@ -31,3 +31,29 @@ void CarregarPassagens(const char* arquivo) {
 
     fclose(f);
 }
+
+void registarPassagem(){
+    Passagem* nova = malloc(sizeof(Passagem));
+    if (!nova) {
+        printf("Erro de alocação de memória.\n");
+        return;
+    }
+
+    printf("Código do sensor: ");
+    scanf("%d", &nova->idSensor);
+    printf("Código do veículo: ");
+    scanf("%d", &nova->codVeiculo);
+    getchar();
+
+    printf("Data (dd-mm-aaaa hh:mm:ss): ");
+    fgets(nova->data, sizeof(nova->data), stdin);
+    nova->data[strcspn(nova->data, "\n")] = '\0';
+
+    printf("Tipo de registo (0=Entrada, 1=Saída): ");
+    scanf("%d", &nova->tipoRegisto);
+
+    nova->prox = passagens;
+    passagens = nova;
+
+    printf("Passagem registada com sucesso!\n");
+}
