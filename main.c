@@ -89,13 +89,17 @@ void listarVeiculoSubmenu(){
         printf("1 - Ordenar por Matrícula\n");
         printf("2 - Ordenar por Marca\n");
         printf("3 - Ordenar por Modelo\n");
+        printf("4 - Pesquisar por Matricula\n");
         printf("0 - Voltar\n");
         printf("Escolha uma opção: ");
         scanf("%d", &opcao);
 
         if (opcao >= 1 && opcao <= 3) {
             listarVeiculosOrdenados(veiculos, opcao);
-        } else if (opcao != 0) {
+        } else if (opcao == 4){
+            pesquisarMatricula();
+        } 
+        else if (opcao != 0) {
             printf("Opção inválida.\n");
         }
 

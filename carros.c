@@ -50,6 +50,34 @@ void ListarVeiculos() {
     }
 }
 
+void pesquisarMatricula() {
+    char matricula[10];
+    
+    printf("Insira a matricula a pesquisar: \n");
+    scanf("%s", matricula);
+
+
+        
+    Veiculo *atual = veiculos;
+    while (atual != NULL) {
+        if (strcmp(atual->matricula, matricula) == 0) {
+            printf("Matrícula: %s\n", atual->matricula);
+            printf("Marca: %s\n", atual->marca);
+            printf("Modelo: %s\n", atual->modelo);
+            printf("Ano: %d\n", atual->ano);
+            printf("Dono (NIF): %d\n", atual->dono);
+            printf("Código Veículo: %d\n", atual->codVeiculo);
+            printf("-----------------------\n");
+           
+            return;
+        } 
+ 
+        atual = atual->prox;
+    }
+
+}
+
+
 int proximoCodVeiculo(){
     int max=0;
     Veiculo* v = veiculos;
@@ -79,7 +107,7 @@ void registarVeiculos(){
     printf("NIF do Dono: ");
     scanf("%d", &novo->dono);
 
-    novo->codVeiculo = proximoCodVeiculo;
+    novo->codVeiculo = proximoCodVeiculo();
 
     novo->prox = veiculos;
     veiculos = novo;

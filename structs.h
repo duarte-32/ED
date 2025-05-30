@@ -58,8 +58,10 @@ int compararNomes (const void* a, const void* b);
 void listarCondutoresOrdemAlfa(Dono* listaDonos);
 int compararContribuintes(const void* a, const void* b);
 void listarCondutoresPorContribuinte(Dono* listaDonos);
+
 void CarregarVeiculos(const char* arquivo);
 void ListarVeiculos();
+void pesquisarMatricula();
 int proximoCodVeiculo();
 void registarVeiculos();
 int compararPorMatricula(const void* a, const void* b);
@@ -70,5 +72,5 @@ void CarregarSensores(const char* arquivo);
 void CarregarDistancias(const char* arquivo);
 void CarregarPassagens(const char* arquivo);
 void registarPassagem();
-
+//TODO: separar por ficheiros .h (mais organizado)
 #endif
