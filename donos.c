@@ -81,6 +81,10 @@ void registarDono(){
     fgets(novo->nome, sizeof(novo->nome), stdin);
     novo->nome[strcspn(novo->nome, "\n")] = '\0'; //Remover \n
 
+    printf("Código Postal: ");
+    fgets(novo->codPostal,sizeof(novo->codPostal),stdin);
+    novo->codPostal[strcspn(novo->codPostal,"\n")] = '\0';
+
     novo->prox = donos;
     donos = novo;
 

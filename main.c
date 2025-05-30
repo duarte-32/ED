@@ -107,7 +107,7 @@ void listarVeiculoSubmenu(){
             listarVeiculosOrdenados(veiculos, opcao);
         } else if (opcao == 4){
             pesquisarMatricula();
-        } 
+        }
         else if (opcao != 0) {
             printf("Opção inválida.\n");
         }
@@ -161,7 +161,7 @@ int main(){
 				break;
             case 7:{
                 size_t memoriaTotal = calcularMemoriaTotal(donos, veiculos, sensores, distancias, passagens);
-                printf("Memória total ocupada pelas estruturas de dados: %zu bytes\n", memoriaTotal);
+                printf("Memória total ocupada pelas estruturas de dados: %zu bytes = %0.2f MB\n", memoriaTotal,(float)memoriaTotal/1000000);
                 break;
             }
 			case 0:
