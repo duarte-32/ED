@@ -1,5 +1,10 @@
 
-#include "structs.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "carros.h"
+
 
 Veiculo* veiculos = NULL;
 
@@ -50,7 +55,9 @@ void ListarVeiculos() {
     }
 }
 
+
 void pesquisarMatricula() {
+   
     char matricula[10];
     
     printf("Insira a matricula a pesquisar: \n");

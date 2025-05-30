@@ -1,5 +1,9 @@
 
-#include "structs.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "donos.h"
 
 Dono *donos = NULL;
 

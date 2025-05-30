@@ -1,4 +1,8 @@
-#include "structs.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "sensores.h"
 
 Sensor *sensores = NULL;
 

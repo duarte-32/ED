@@ -1,4 +1,8 @@
-#include "structs.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "passagens.h"
 
 Passagem* passagens = NULL;
 

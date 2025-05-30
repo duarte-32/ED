@@ -1,6 +1,14 @@
-
-#include "structs.h"
+#include <stdio.h>
 #include <locale.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "donos.h"
+#include "carros.h"
+#include "sensores.h"
+#include "distancias.h"
+#include "passagens.h"
+
 
 // Listas vazias globais
 extern Dono *donos;
@@ -77,9 +85,10 @@ void listarDonoSubmenu(){
                 printf("Opção inválida!\n");
 
         }
-    }while(opcao != 0);
+    }
+    while(opcao != 0);
 
-    return 0;
+    return;
 }
 
 void listarVeiculoSubmenu(){
@@ -105,7 +114,7 @@ void listarVeiculoSubmenu(){
 
     } while (opcao != 0);
 
-    return 0;
+    return;
 }
 
 
@@ -164,5 +173,6 @@ int main(){
 	}while(op !=0);
 
 	printf("Programa fechado. \n");
+
 	return 0;
 }
