@@ -57,14 +57,14 @@ void ListarVeiculos() {
 
 
 void pesquisarMatricula() {
-   
+
     char matricula[10];
-    
+
     printf("Insira a matricula a pesquisar: \n");
     scanf("%s", matricula);
 
 
-        
+
     Veiculo *atual = veiculos;
     while (atual != NULL) {
         if (strcmp(atual->matricula, matricula) == 0) {
@@ -75,10 +75,10 @@ void pesquisarMatricula() {
             printf("Dono (NIF): %d\n", atual->dono);
             printf("Código Veículo: %d\n", atual->codVeiculo);
             printf("-----------------------\n");
-           
+
             return;
-        } 
- 
+        }
+
         atual = atual->prox;
     }
 
@@ -189,7 +189,7 @@ void listarVeiculosOrdenados(Veiculo* listaVeiculos, int criterio) {
     free(array);
 }
 
-//Percorre alista de veículo e devolve o ponteiro para o veículo que tem o código fornecido
+//Percorre a lista de veículo e devolve o ponteiro para o veículo que tem o código fornecido
 Veiculo* obterVeiculo(Veiculo* lista, int cod){
     while(lista){
         if(lista->codVeiculo == cod) return lista;

@@ -110,7 +110,7 @@ void listarVeiculoSubmenu(){
 
     } while (opcao != 0);
 
-    return 0;
+    return;
 }
 
 void subMenuAnaliseCirculacao(){
@@ -280,4 +280,3 @@ int main(){
 	printf("Programa fechado. \n");
 	return 0;
 }
-

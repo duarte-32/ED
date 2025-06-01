@@ -74,7 +74,7 @@ time_t stringParaTempo(const char* data){
 void rankingCirculacao(Passagem* passagens, Distancia* distancias, Veiculo* veiculos, const char* dataInicio, const char* dataFim) {
     time_t tInicio = stringParaTempo(dataInicio);
     time_t tFim = stringParaTempo(dataFim);
-    RankingVeiculo ranking[1000];
+    Veiculo ranking[1000];
     int n = 0;
 
     Passagem* p = passagens;
@@ -91,14 +91,14 @@ void rankingCirculacao(Passagem* passagens, Distancia* distancias, Veiculo* veic
                             int i, existe = 0;
                             for (i = 0; i < n; i++) {
                                 if (ranking[i].codVeiculo == p->codVeiculo) {
-                                    ranking[i].kmTotal += d;
+                                    ranking[i].totalKm += d;
                                     existe = 1;
                                     break;
                                 }
                             }
                             if (!existe) {
                                 ranking[n].codVeiculo = p->codVeiculo;
-                                ranking[n].kmTotal = d;
+                                ranking[n].totalKm = d;
                                 n++;
                             }
                         }
@@ -114,8 +114,8 @@ void rankingCirculacao(Passagem* passagens, Distancia* distancias, Veiculo* veic
     // Ordenar
     for (int i = 0; i < n-1; i++)
         for (int j = i+1; j < n; j++)
-            if (ranking[j].kmTotal > ranking[i].kmTotal) {
-                RankingVeiculo tmp = ranking[i];
+            if (ranking[j].totalKm > ranking[i].totalKm) {
+                Veiculo tmp = ranking[i];
                 ranking[i] = ranking[j];
                 ranking[j] = tmp;
             }
@@ -125,7 +125,7 @@ void rankingCirculacao(Passagem* passagens, Distancia* distancias, Veiculo* veic
     for (int i = 0; i < n; i++) {
         Veiculo* v = obterVeiculo(veiculos, ranking[i].codVeiculo);
         if (v)
-            printf("Matrícula: %s | Marca: %s | Modelo: %s | KM: %.2f\n", v->matricula, v->marca, v->modelo, ranking[i].kmTotal);
+            printf("Matrícula: %s | Marca: %s | Modelo: %s | KM: %.2f\n", v->matricula, v->marca, v->modelo, ranking[i].totalKm);
     }
 }
 
@@ -133,7 +133,7 @@ void rankingCirculacao(Passagem* passagens, Distancia* distancias, Veiculo* veic
 void rankingPorMarca(Passagem* passagens, Distancia* distancias, Veiculo* veiculos, const char* dataInicio, const char* dataFim) {
     time_t tInicio = stringParaTempo(dataInicio);
     time_t tFim = stringParaTempo(dataFim);
-    RankingMarca marcas[100];
+    Veiculo marcas[100];
     int n = 0;
 
     Passagem* p = passagens;
@@ -152,14 +152,14 @@ void rankingPorMarca(Passagem* passagens, Distancia* distancias, Veiculo* veicul
                                 int i, existe = 0;
                                 for (i = 0; i < n; i++) {
                                     if (strcmp(marcas[i].marca, v->marca) == 0) {
-                                        marcas[i].kmTotal += d;
+                                        marcas[i].totalKm += d;
                                         existe = 1;
                                         break;
                                     }
                                 }
                                 if (!existe) {
                                     strcpy(marcas[n].marca, v->marca);
-                                    marcas[n].kmTotal = d;
+                                    marcas[n].totalKm = d;
                                     n++;
                                 }
                             }
@@ -176,15 +176,15 @@ void rankingPorMarca(Passagem* passagens, Distancia* distancias, Veiculo* veicul
     // Ordenar
     for (int i = 0; i < n-1; i++)
         for (int j = i+1; j < n; j++)
-            if (marcas[j].kmTotal > marcas[i].kmTotal) {
-                RankingMarca tmp = marcas[i];
+            if (marcas[j].totalKm > marcas[i].totalKm) {
+                Veiculo tmp = marcas[i];
                 marcas[i] = marcas[j];
                 marcas[j] = tmp;
             }
 
     printf("\n--- Ranking por marca ---\n");
     for (int i = 0; i < n; i++)
-        printf("Marca: %s | KM: %.2f\n", marcas[i].marca, marcas[i].kmTotal);
+        printf("Marca: %s | KM: %.2f\n", marcas[i].marca, marcas[i].totalKm);
 }
 
 void listarInfracoes(Passagem* passagens, Distancia* distancias, Veiculo* veiculos, const char* dataInicio, const char* dataFim) {
@@ -225,7 +225,7 @@ void listarInfracoes(Passagem* passagens, Distancia* distancias, Veiculo* veicul
 void rankingInfracoes(Passagem* passagens, Distancia* distancias, Veiculo* veiculos, const char* dataInicio, const char* dataFim) {
     time_t tInicio = stringParaTempo(dataInicio);
     time_t tFim = stringParaTempo(dataFim);
-    InfracaoVeiculo lista[1000];
+    Veiculo lista[1000];
     int n = 0;
 
     Passagem* p = passagens;
@@ -270,7 +270,7 @@ void rankingInfracoes(Passagem* passagens, Distancia* distancias, Veiculo* veicu
     for (int i = 0; i < n-1; i++)
         for (int j = i+1; j < n; j++)
             if (lista[j].numInfracoes > lista[i].numInfracoes) {
-                InfracaoVeiculo tmp = lista[i];
+                Veiculo tmp = lista[i];
                 lista[i] = lista[j];
                 lista[j] = tmp;
             }
@@ -283,7 +283,7 @@ void rankingInfracoes(Passagem* passagens, Distancia* distancias, Veiculo* veicu
 }
 
 void calcularVelocidadesMedias(Passagem* passagens, Distancia* distancias, Veiculo* veiculos) {
-    VelocidadeMedia lista[1000];
+    Veiculo lista[1000];
     int n = 0;
 
     for (Passagem* p = passagens; p; p = p->prox) {
@@ -331,7 +331,7 @@ void calcularVelocidadesMedias(Passagem* passagens, Distancia* distancias, Veicu
 
 
 void marcaMaisRapida(Passagem* passagens, Distancia* distancias, Veiculo* veiculos) {
-    MarcaVelocidade lista[100];
+    Veiculo lista[100];
     int n = 0;
 
     for (Passagem* p = passagens; p; p = p->prox) {
@@ -384,7 +384,7 @@ void marcaMaisRapida(Passagem* passagens, Distancia* distancias, Veiculo* veicul
 
 
 void donoMaisRapido(Passagem* passagens, Distancia* distancias, Veiculo* veiculos, Dono* donos) {
-    DonoVelocidade lista[500];
+    Veiculo lista[500];
     int n = 0;
 
     for (Passagem* p = passagens; p; p = p->prox) {
@@ -480,7 +480,7 @@ void mediaPorCodigoPostal(Passagem* passagens, Distancia* distancias, Veiculo* v
 
 
 void marcaMaisComum(Veiculo* veiculos) {
-    MarcaContador marcas[100];
+    Veiculo marcas[100];
     int n = 0;
 
     for (Veiculo* v = veiculos; v; v = v->prox) {
@@ -508,3 +508,65 @@ void marcaMaisComum(Veiculo* veiculos) {
     printf("Marca mais comum: %s (%d veículos)\n", marcas[max].marca, marcas[max].total);
 }
 
+void exportarParaCSV(Dono* donos, Veiculo* veiculos, Sensor* sensores, Passagem* passagens) {
+    FILE* f = fopen("base_dados.csv", "w");
+    if (!f) {
+        printf("Erro ao criar ficheiro CSV.\n");
+        return;
+    }
+
+    fprintf(f, "Dono,NIF,Código Postal\n");
+    for (Dono* d = donos; d; d = d->prox)
+        fprintf(f, "%s,%d,%s\n", d->nome, d->numContribuinte, d->codPostal);
+
+    fprintf(f, "\nMatrícula,Marca,Modelo,Ano,NIF Dono,Código Veículo\n");
+    for (Veiculo* v = veiculos; v; v = v->prox)
+        fprintf(f, "%s,%s,%s,%d,%d,%d\n", v->matricula, v->marca, v->modelo, v->ano, v->dono, v->codVeiculo);
+
+    fprintf(f, "\nSensor,Código,Latitude,Longitude\n");
+    for (Sensor* s = sensores; s; s = s->prox)
+        fprintf(f, "%s,%d,%s,%s\n", s->designacao, s->codSensor, s->latitude, s->longitude);
+
+    fprintf(f, "\nSensor,Veículo,Data,Tipo\n");
+    for (Passagem* p = passagens; p; p = p->prox)
+        fprintf(f, "%d,%d,%s,%d\n", p->idSensor, p->codVeiculo, p->data, p->tipoRegisto);
+
+    fclose(f);
+    printf("Base de dados exportada para base_dados.csv\n");
+}
+
+void exportarParaXML(Dono* donos, Veiculo* veiculos) {
+    FILE* f = fopen("base_dados.xml", "w");
+    if (!f) {
+        printf("Erro ao criar ficheiro XML.\n");
+        return;
+    }
+
+    fprintf(f, "<BaseDeDados>\n");
+
+    fprintf(f, "  <Donos>\n");
+    for (Dono* d = donos; d; d = d->prox) {
+        fprintf(f, "    <Dono>\n");
+        fprintf(f, "      <Nome>%s</Nome>\n", d->nome);
+        fprintf(f, "      <NIF>%d</NIF>\n", d->numContribuinte);
+        fprintf(f, "      <CodigoPostal>%s</CodigoPostal>\n", d->codPostal);
+        fprintf(f, "    </Dono>\n");
+    }
+    fprintf(f, "  </Donos>\n");
+
+    fprintf(f, "  <Veiculos>\n");
+    for (Veiculo* v = veiculos; v; v = v->prox) {
+        fprintf(f, "    <Veiculo>\n");
+        fprintf(f, "      <Matricula>%s</Matricula>\n", v->matricula);
+        fprintf(f, "      <Marca>%s</Marca>\n", v->marca);
+        fprintf(f, "      <Modelo>%s</Modelo>\n", v->modelo);
+        fprintf(f, "      <Ano>%d</Ano>\n", v->ano);
+        fprintf(f, "      <Dono>%d</Dono>\n", v->dono);
+        fprintf(f, "    </Veiculo>\n");
+    }
+    fprintf(f, "  </Veiculos>\n");
+
+    fprintf(f, "</BaseDeDados>\n");
+    fclose(f);
+    printf("Base de dados exportada para base_dados.xml\n");
+}

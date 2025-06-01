@@ -1,6 +1,10 @@
 #ifndef DONOS_H
 #define DONOS_H
 
+#include "carros.h"
+#include "sensores.h"
+
+
 typedef struct Dono {
     int numContribuinte;
     char nome[100];
@@ -19,6 +23,6 @@ void listarCondutoresOrdemAlfa(Dono* listaDonos);
 int compararContribuintes(const void* a, const void* b);
 void listarCondutoresPorContribuinte(Dono* listaDonos);
 void exportarParaXML(Dono* donos, Veiculo* veiculos);
-void exportarParaCSV(Dono* donos, Veiculo* veiculos, Sensor* sensores, Passagem* passagens);
+
 
 #endif

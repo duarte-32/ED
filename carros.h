@@ -9,6 +9,10 @@ typedef struct Veiculo {
     int dono; // numContribuinte do dono
     int codVeiculo;
     struct Veiculo* prox;
+    int numInfracoes;
+    int totalHoras;
+    float totalKm;
+    int total;
 } Veiculo;
 
 void CarregarVeiculos(const char* arquivo);

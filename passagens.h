@@ -1,6 +1,11 @@
 #ifndef PASSAGENS_H
 #define PASSAGENS_H
 
+#include <time.h>
+#include "donos.h"
+#include "carros.h"
+#include "distancias.h"
+
 typedef struct Passagem {
     int idSensor;
     int codVeiculo;
@@ -21,6 +26,7 @@ void marcaMaisRapida(Passagem* passagens, Distancia* distancias, Veiculo* veicul
 void donoMaisRapido(Passagem* passagens, Distancia* distancias, Veiculo* veiculos, Dono* donos);
 void mediaPorCodigoPostal(Passagem* passagens, Distancia* distancias, Veiculo* veiculos, Dono* donos, const char* codigoPostal);
 void marcaMaisComum(Veiculo* veiculos);
+void exportarParaCSV(Dono* donos, Veiculo* veiculos, Sensor* sensores, Passagem* passagens);
 
 
 #endif
