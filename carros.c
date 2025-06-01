@@ -189,3 +189,11 @@ void listarVeiculosOrdenados(Veiculo* listaVeiculos, int criterio) {
     free(array);
 }
 
+//Percorre alista de veículo e devolve o ponteiro para o veículo que tem o código fornecido
+Veiculo* obterVeiculo(Veiculo* lista, int cod){
+    while(lista){
+        if(lista->codVeiculo == cod) return lista;
+        lista = lista->prox;
+    }
+    return NULL;
+}
