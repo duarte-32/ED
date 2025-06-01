@@ -18,5 +18,7 @@ int compararNomes (const void* a, const void* b);
 void listarCondutoresOrdemAlfa(Dono* listaDonos);
 int compararContribuintes(const void* a, const void* b);
 void listarCondutoresPorContribuinte(Dono* listaDonos);
+void exportarParaXML(Dono* donos, Veiculo* veiculos);
+void exportarParaCSV(Dono* donos, Veiculo* veiculos, Sensor* sensores, Passagem* passagens);
 
 #endif
