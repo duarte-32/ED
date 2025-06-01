@@ -171,3 +171,67 @@ void listarCondutoresPorContribuinte(Dono* listaDonos){
 
     free(arrayDonos);
 }
+
+
+void exportarParaCSV(Dono* donos, Veiculo* veiculos, Sensor* sensores, Passagem* passagens) {
+    FILE* f = fopen("base_dados.csv", "w");
+    if (!f) {
+        printf("Erro ao criar ficheiro CSV.\n");
+        return;
+    }
+
+    fprintf(f, "Dono,NIF,Código Postal\n");
+    for (Dono* d = donos; d; d = d->prox)
+        fprintf(f, "%s,%d,%s\n", d->nome, d->numContribuinte, d->codPostal);
+
+    fprintf(f, "\nMatrícula,Marca,Modelo,Ano,NIF Dono,Código Veículo\n");
+    for (Veiculo* v = veiculos; v; v = v->prox)
+        fprintf(f, "%s,%s,%s,%d,%d,%d\n", v->matricula, v->marca, v->modelo, v->ano, v->dono, v->codVeiculo);
+
+    fprintf(f, "\nSensor,Código,Latitude,Longitude\n");
+    for (Sensor* s = sensores; s; s = s->prox)
+        fprintf(f, "%s,%d,%s,%s\n", s->designacao, s->codSensor, s->latitude, s->longitude);
+
+    fprintf(f, "\nSensor,Veículo,Data,Tipo\n");
+    for (Passagem* p = passagens; p; p = p->prox)
+        fprintf(f, "%d,%d,%s,%d\n", p->idSensor, p->codVeiculo, p->data, p->tipoRegisto);
+
+    fclose(f);
+    printf("Base de dados exportada para base_dados.csv\n");
+}
+
+void exportarParaXML(Dono* donos, Veiculo* veiculos) {
+    FILE* f = fopen("base_dados.xml", "w");
+    if (!f) {
+        printf("Erro ao criar ficheiro XML.\n");
+        return;
+    }
+
+    fprintf(f, "<BaseDeDados>\n");
+
+    fprintf(f, "  <Donos>\n");
+    for (Dono* d = donos; d; d = d->prox) {
+        fprintf(f, "    <Dono>\n");
+        fprintf(f, "      <Nome>%s</Nome>\n", d->nome);
+        fprintf(f, "      <NIF>%d</NIF>\n", d->numContribuinte);
+        fprintf(f, "      <CodigoPostal>%s</CodigoPostal>\n", d->codPostal);
+        fprintf(f, "    </Dono>\n");
+    }
+    fprintf(f, "  </Donos>\n");
+
+    fprintf(f, "  <Veiculos>\n");
+    for (Veiculo* v = veiculos; v; v = v->prox) {
+        fprintf(f, "    <Veiculo>\n");
+        fprintf(f, "      <Matricula>%s</Matricula>\n", v->matricula);
+        fprintf(f, "      <Marca>%s</Marca>\n", v->marca);
+        fprintf(f, "      <Modelo>%s</Modelo>\n", v->modelo);
+        fprintf(f, "      <Ano>%d</Ano>\n", v->ano);
+        fprintf(f, "      <Dono>%d</Dono>\n", v->dono);
+        fprintf(f, "    </Veiculo>\n");
+    }
+    fprintf(f, "  </Veiculos>\n");
+
+    fprintf(f, "</BaseDeDados>\n");
+    fclose(f);
+    printf("Base de dados exportada para base_dados.xml\n");
+}
