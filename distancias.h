@@ -9,5 +9,6 @@ typedef struct Distancia{
 } Distancia;
 
 void CarregarDistancias(const char* arquivo);
+float obterDistanciaEntreSensores(Distancia* distancias, int s1, int s2);
 
 #endif
