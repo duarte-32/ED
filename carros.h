@@ -20,5 +20,6 @@ int compararPorMatricula(const void* a, const void* b);
 int compararPorMarca(const void* a, const void* b);
 int compararPorModelo(const void* a, const void* b);
 void listarVeiculosOrdenados(Veiculo* listaVeiculos, int criterio);
+Veiculo* obterVeiculo(Veiculo* lista, int cod);
 
 #endif
