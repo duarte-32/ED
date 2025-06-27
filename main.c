@@ -1,14 +1,6 @@
-#include <stdio.h>
+
+#include "structs.h"
 #include <locale.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include "donos.h"
-#include "carros.h"
-#include "sensores.h"
-#include "distancias.h"
-#include "passagens.h"
-
 
 // Listas vazias globais
 extern Dono *donos;
@@ -85,10 +77,9 @@ void listarDonoSubmenu(){
                 printf("Opção inválida!\n");
 
         }
-    }
-    while(opcao != 0);
+    }while(opcao != 0);
 
-    return;
+    return 0;
 }
 
 void listarVeiculoSubmenu(){
@@ -117,40 +108,45 @@ void subMenuAnaliseCirculacao(){
     char dataInicio[30], dataFim[30];
     int opcao;
 
-    getchar(); //Limpar \n pendente do scnaf anterior
+    limparBuffer(); //Limpar \n pendente do scnaf anterior
 
     printf("\n--- Submenu Análise de Circulação --\n");
     printf("Introduza o período a analisar: \n");
 
-    printf("Data início (dd-mm-yyyy hh:mm:ss: ");
+    printf("Data início (dd-mm-yyyy hh:mm:ss:):");
     fgets(dataInicio, sizeof(dataInicio), stdin);
     dataInicio[strcspn(dataInicio, "\n")] = '\0';
 
-    printf("Data fim (dd-mm-yyyy hh:mm:ss: ");
+    printf("Data fim (dd-mm-yyyy hh:mm:ss:): ");
     fgets(dataFim, sizeof(dataFim), stdin);
     dataFim[strcspn(dataFim, "\n")] = '\0';
 
      do {
         printf("\n--- Análises Disponíveis ---\n");
-        printf("| 1.Ranking de circulação por veículo (total km)    |\n");
-        printf("| 2.Ranking por marca (total km)                    |\n");
-        printf("| 3.Veículos com velocidade média > 120 km/h        |\n");
-        printf("| 4.Ranking de infrações por veículo                |\n");
+        printf("| 1.Listar veículos por matrícula (por período)     |\n");
+        printf("| 2.Ranking de circulação por veículo (total km)    |\n");
+        printf("| 3.Ranking por marca (total km)                    |\n");
+        printf("| 4.Veículos com velocidade média > 120 km/h        |\n");
+        printf("| 5.Ranking de infrações por veículo                |\n");
         printf("| 0.Voltar                                          |\n");
         printf("Escolha uma opção: ");
         scanf("%d", &opcao);
+        limparBuffer();
 
         switch (opcao) {
             case 1:
-                rankingCirculacao(passagens, distancias, veiculos, dataInicio, dataFim);
+                listarVeiculosPorMatriculaPeriodo(passagens, veiculos, dataInicio, dataFim);
                 break;
             case 2:
-                rankingPorMarca(passagens, distancias, veiculos, dataInicio, dataFim);
+                rankingCirculacao(passagens, distancias, veiculos, dataInicio, dataFim);
                 break;
             case 3:
-                listarInfracoes(passagens, distancias, veiculos, dataInicio, dataFim);
+                rankingPorMarca(passagens, distancias, veiculos, dataInicio, dataFim);
                 break;
             case 4:
+                listarInfracoes(passagens, distancias, veiculos, dataInicio, dataFim);
+                break;
+            case 5:
                 rankingInfracoes(passagens, distancias, veiculos, dataInicio, dataFim);
                 break;
             case 0:
@@ -280,4 +276,3 @@ int main(){
 	printf("Programa fechado. \n");
 	return 0;
 }
-
