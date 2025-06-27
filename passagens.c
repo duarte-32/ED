@@ -1,8 +1,5 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include "passagens.h"
+#include "structs.h"
+#include <time.h>
 
 Passagem* passagens = NULL;
 
@@ -36,6 +33,7 @@ void CarregarPassagens(const char* arquivo) {
     fclose(f);
 }
 
+
 void registarPassagem(){
     Passagem* nova = malloc(sizeof(Passagem));
     if (!nova) {
@@ -60,13 +58,6 @@ void registarPassagem(){
     passagens = nova;
 
     printf("Passagem registada com sucesso!\n");
-}
-time_t stringParaTempo(const char* data){
-    struct tm tm = {0};
-    sscanf(data, "%d-%d-%d %d:%d:%d", &tm.tm_mday, &tm.tm_mon, &tm.tm_year, &tm.tm_hour, &tm.tm_min, &tm.tm_sec);
-    tm.tm_year -= 1900;
-    tm.tm_mon -=1;
-    return mktime(&tm);
 }
 
 
