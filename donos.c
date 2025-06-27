@@ -1,9 +1,5 @@
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include "donos.h"
+#include "structs.h"
+#include <time.h>
 
 Dono *donos = NULL;
 
@@ -81,21 +77,12 @@ void registarDono(){
     fgets(novo->nome, sizeof(novo->nome), stdin);
     novo->nome[strcspn(novo->nome, "\n")] = '\0'; //Remover \n
 
-    printf("Código Postal: ");
-    fgets(novo->codPostal,sizeof(novo->codPostal),stdin);
-    novo->codPostal[strcspn(novo->codPostal,"\n")] = '\0';
-
     novo->prox = donos;
     donos = novo;
 
     printf("Dono registado com sucesso.\n");
 }
 
-int compararNomes (const void* a, const void* b){
-    char* nomeA = *(char**)a;
-    char* nomeB = *(char**)b;
-    return strcmp(nomeA, nomeB);
-}
 
 void listarCondutoresOrdemAlfa(Dono* listaDonos){
     int count = 0;
@@ -131,11 +118,7 @@ void listarCondutoresOrdemAlfa(Dono* listaDonos){
     free(nomes); //Libertar memória do array
 }
 
-int compararContribuintes(const void* a, const void* b){
-    Dono* da = *(Dono**)a;
-    Dono* db = *(Dono**)b;
-    return da->numContribuinte - db->numContribuinte;
-}
+
 
 void listarCondutoresPorContribuinte(Dono* listaDonos){
     if (listaDonos == NULL) {
@@ -171,7 +154,6 @@ void listarCondutoresPorContribuinte(Dono* listaDonos){
 
     free(arrayDonos);
 }
-
 
 void exportarParaCSV(Dono* donos, Veiculo* veiculos, Sensor* sensores, Passagem* passagens) {
     FILE* f = fopen("base_dados.csv", "w");
