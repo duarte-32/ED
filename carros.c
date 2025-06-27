@@ -1,10 +1,5 @@
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include "carros.h"
-
+#include "structs.h"
+#include <time.h>
 
 Veiculo* veiculos = NULL;
 
@@ -55,16 +50,25 @@ void ListarVeiculos() {
     }
 }
 
-
+int proximoCodVeiculo(){
+    int max=0;
+    Veiculo* v = veiculos;
+    while(v){
+        if(v->codVeiculo > max)
+            max = v->codVeiculo;
+        v = v->prox;
+    }
+    return max + 1;
+}
+/*
 void pesquisarMatricula() {
-   
+
     char matricula[10];
-    
+
     printf("Insira a matricula a pesquisar: \n");
     scanf("%s", matricula);
 
 
-        
     Veiculo *atual = veiculos;
     while (atual != NULL) {
         if (strcmp(atual->matricula, matricula) == 0) {
@@ -75,25 +79,74 @@ void pesquisarMatricula() {
             printf("Dono (NIF): %d\n", atual->dono);
             printf("Código Veículo: %d\n", atual->codVeiculo);
             printf("-----------------------\n");
-           
+
             return;
-        } 
- 
+        }
+
         atual = atual->prox;
     }
 
 }
+*/
+void listarVeiculosPorMatriculaPeriodo(Passagem* passagens, Veiculo* veiculos, const char* dataInicio, const char* dataFim){
 
+   Veiculo** veiculosEncontrados = NULL;
+   int tamanho = 0;
+   int capacidade = 0;
+   veiculosEncontrados = malloc(capacidade*sizeof(Veiculo*));
 
-int proximoCodVeiculo(){
-    int max=0;
-    Veiculo* v = veiculos;
-    while(v){
-        if(v->codVeiculo > max)
-            max = v->codVeiculo;
-        v = v->prox;
+   time_t inicio = stringParaTempo(dataInicio);
+   time_t fim = stringParaTempo(dataFim);
+
+   //Evitar duplicados - lista de codVeiculos já adicionados
+   int* codsAdicionados = malloc(capacidade*sizeof(int));
+   int numCods = 0;
+
+   for(Passagem* p = passagens; p!=NULL; p=p->prox){
+    limparBuffer();
+    time_t tempoPassagem = stringParaTempo(p->data);
+
+    if(tempoPassagem >= inicio && tempoPassagem <= fim){
+        //Verificar se o veiculo atual já foi adicionado
+        int jaAdicionado = 0;
+        for(int i = 0; i< numCods; i++){
+                if(codsAdicionados[i] == p->codVeiculo){
+                    jaAdicionado = 1;
+                    break;
+                }
+        }
+        if(!jaAdicionado){
+            //Obter o veiculo correspondente
+            Veiculo* v = obterVeiculo(veiculos, p->codVeiculo);
+            //Guardar ponteiros para veiculos e realocar memória para os arrays
+            if(v!=NULL){
+                if(tamanho == capacidade){
+                    capacidade *=2;
+                    veiculosEncontrados = realloc(veiculosEncontrados, capacidade*sizeof(Veiculo*));
+                    codsAdicionados = realloc(codsAdicionados, capacidade*sizeof(int));
+                }
+                veiculosEncontrados[tamanho++] = v;
+                codsAdicionados[numCods++] = p->codVeiculo;
+            }
+        }
     }
-    return max + 1;
+   }
+
+   qsort(veiculosEncontrados, tamanho, sizeof(Veiculo*), compararPorMatricula);
+
+   //Listar
+   printf("\n--- Veículos que circularam entre %s e %s (ordenados por matrícula) ---\n");
+   for(int i =0; i>tamanho; i++){
+    printf("Matrícula: %s | MArca: %s | Modelo: %s | Ano: %d | Código: %d | NIF: %d\n",
+            veiculosEncontrados[i]->matricula,
+            veiculosEncontrados[i]->marca,
+            veiculosEncontrados[i]->modelo,
+            veiculosEncontrados[i]->ano,
+            veiculosEncontrados[i]->codVeiculo,
+            veiculosEncontrados[i]->dono);
+   }
+   free(veiculosEncontrados);
+   free(codsAdicionados);
 }
 
 void registarVeiculos(){
@@ -114,7 +167,7 @@ void registarVeiculos(){
     printf("NIF do Dono: ");
     scanf("%d", &novo->dono);
 
-    novo->codVeiculo = proximoCodVeiculo();
+    novo->codVeiculo = proximoCodVeiculo;
 
     novo->prox = veiculos;
     veiculos = novo;
@@ -123,17 +176,7 @@ void registarVeiculos(){
 }
 
 
-int compararPorMatricula(const void* a, const void* b) {
-    return strcmp((*(Veiculo**)a)->matricula, (*(Veiculo**)b)->matricula);
-}
 
-int compararPorMarca(const void* a, const void* b) {
-    return strcmp((*(Veiculo**)a)->marca, (*(Veiculo**)b)->marca);
-}
-
-int compararPorModelo(const void* a, const void* b) {
-    return strcmp((*(Veiculo**)a)->modelo, (*(Veiculo**)b)->modelo);
-}
 
 void listarVeiculosOrdenados(Veiculo* listaVeiculos, int criterio) {
     if (listaVeiculos == NULL) {
