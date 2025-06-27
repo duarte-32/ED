@@ -1,9 +1,5 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include "distancias.h"
-
+#include "structs.h"
+#include <time.h>
 
 Distancia *distancias = NULL;
 
