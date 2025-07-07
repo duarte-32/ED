@@ -92,51 +92,50 @@ void listarVeiculosPorMatriculaPeriodo(Passagem* passagens, Veiculo* veiculos, c
 
    Veiculo** veiculosEncontrados = NULL;
    int tamanho = 0;
-   int capacidade = 0;
+   int capacidade = 10;
    veiculosEncontrados = malloc(capacidade*sizeof(Veiculo*));
 
-   time_t inicio = stringParaTempo(dataInicio);
-   time_t fim = stringParaTempo(dataFim);
+   TempoComMs inicio = stringParaTempoComMs(dataInicio);
+   TempoComMs fim = stringParaTempoComMs(dataFim);
 
    //Evitar duplicados - lista de codVeiculos já adicionados
    int* codsAdicionados = malloc(capacidade*sizeof(int));
    int numCods = 0;
 
    for(Passagem* p = passagens; p!=NULL; p=p->prox){
-    limparBuffer();
-    time_t tempoPassagem = stringParaTempo(p->data);
+        TempoComMs tempoPassagem = stringParaTempoComMs(p->data);
 
-    if(tempoPassagem >= inicio && tempoPassagem <= fim){
-        //Verificar se o veiculo atual já foi adicionado
-        int jaAdicionado = 0;
-        for(int i = 0; i< numCods; i++){
-                if(codsAdicionados[i] == p->codVeiculo){
-                    jaAdicionado = 1;
-                    break;
+        if(tempoPassagem.tempoBase >= inicio.tempoBase && tempoPassagem.tempoBase <= fim.tempoBase){
+            //Verificar se o veiculo atual já foi adicionado
+            int jaAdicionado = 0;
+            for(int i = 0; i< numCods; i++){
+                    if(codsAdicionados[i] == p->codVeiculo){
+                        jaAdicionado = 1;
+                        break;
+                    }
+            }
+            if(!jaAdicionado){
+                //Obter o veiculo correspondente
+                Veiculo* v = obterVeiculo(veiculos, p->codVeiculo);
+                //Guardar ponteiros para veiculos e realocar memória para os arrays
+                if(v!=NULL){
+                    if(tamanho == capacidade){
+                        capacidade *=2;
+                        veiculosEncontrados = realloc(veiculosEncontrados, capacidade*sizeof(Veiculo*));
+                        codsAdicionados = realloc(codsAdicionados, capacidade*sizeof(int));
+                    }
+                    veiculosEncontrados[tamanho++] = v;
+                    codsAdicionados[numCods++] = p->codVeiculo;
                 }
-        }
-        if(!jaAdicionado){
-            //Obter o veiculo correspondente
-            Veiculo* v = obterVeiculo(veiculos, p->codVeiculo);
-            //Guardar ponteiros para veiculos e realocar memória para os arrays
-            if(v!=NULL){
-                if(tamanho == capacidade){
-                    capacidade *=2;
-                    veiculosEncontrados = realloc(veiculosEncontrados, capacidade*sizeof(Veiculo*));
-                    codsAdicionados = realloc(codsAdicionados, capacidade*sizeof(int));
-                }
-                veiculosEncontrados[tamanho++] = v;
-                codsAdicionados[numCods++] = p->codVeiculo;
             }
         }
-    }
    }
 
    qsort(veiculosEncontrados, tamanho, sizeof(Veiculo*), compararPorMatricula);
 
    //Listar
    printf("\n--- Veículos que circularam entre %s e %s (ordenados por matrícula) ---\n");
-   for(int i =0; i>tamanho; i++){
+   for(int i =0; i<tamanho; i++){
     printf("Matrícula: %s | MArca: %s | Modelo: %s | Ano: %d | Código: %d | NIF: %d\n",
             veiculosEncontrados[i]->matricula,
             veiculosEncontrados[i]->marca,
@@ -239,4 +238,76 @@ Veiculo* obterVeiculo(Veiculo* lista, int cod){
         lista = lista->prox;
     }
     return NULL;
+}
+
+
+void carroMaisRapido(Passagem* passagens, Distancia* distancias, Veiculo* veiculos, Dono* donos){
+    VelocidadeMedia* velocidades = NULL;
+    int tamanho = 0;
+    int capacidade = 10;
+    velocidades = malloc(capacidade * sizeof(VelocidadeMedia));
+
+    Passagem* p = passagens;
+    while(p!=NULL){
+        if(p->tipoRegisto == 0){ //Entrada
+            Passagem* saida = p->prox;
+            while(saida != NULL && !(saida->codVeiculo == p->codVeiculo && saida->tipoRegisto ==1)){
+                saida = saida->prox;
+            }
+            if(saida!=NULL){
+                float dist = obterDistanciaEntreSensores(distancias, p->idSensor, saida->idSensor);
+                time_t t1 = stringParaTempo(p->data);
+                time_t t2 = stringParaTempo(saida->data);
+                float horas = difftime(t2, t1)/3600.0; //Calcular o tempo em horas
+
+                if(horas > 0 && dist > 0){
+                    int encontrado = 0;
+                    for(int i = 0; i> tamanho; i++){
+                        if(velocidades[i].codVeiculo == p->codVeiculo){
+                            velocidades[i].totalKm += dist;
+                            velocidades[i].totalHoras += horas;
+                            encontrado = 1;
+                            break;
+                        }
+                    }
+                    //Adicionar um novo veículo ao array velocidades
+                    if(!encontrado){
+                        if(tamanho == capacidade){
+                            capacidade *= 2;
+                            velocidades = realloc(velocidades, capacidade * sizeof(VelocidadeMedia));
+                        }
+                        velocidades[tamanho].codVeiculo = p->codVeiculo;
+                        velocidades[tamanho].totalKm = dist;
+                        velocidades[tamanho].totalHoras = horas;
+                        tamanho++;
+                    }
+                }
+            }
+        }
+        p = p->prox;
+    }
+
+    float maxVel = 0;
+    int codMax = -1;
+    for(int i = 0; i<tamanho; i++){
+        float vel = velocidades[i].totalKm/ velocidades[i].totalHoras;
+        if(vel > maxVel){
+            maxVel = vel;
+            codMax = velocidades[i].codVeiculo;
+        }
+    }
+
+    if(codMax != -1){
+        Veiculo* v = obterVeiculo(veiculos, codMax);
+        Dono* d = donos;
+        while (d!= NULL && d->numContribuinte != v->dono){
+            d = d->prox;
+        }
+        printf("Carro mais rápido: %s %s (%s), Velocidade média: %.2f km/h\n", v->marca, v->modelo, v->matricula, maxVel);
+        if(d!=NULL){
+            printf("Dono: %s (NIF: %d)\n", d->nome, d->numContribuinte);
+        }
+    }
+
+    free(velocidades);
 }
