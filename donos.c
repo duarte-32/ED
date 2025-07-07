@@ -217,3 +217,55 @@ void exportarParaXML(Dono* donos, Veiculo* veiculos) {
     fclose(f);
     printf("Base de dados exportada para base_dados.xml\n");
 }
+
+void subnomeMaisComum(Dono* donos){
+    SubnomeContador* lista = NULL;
+    int tamanho = 0, capacidade = 10;
+    lista = malloc(capacidade * sizeof(SubnomeContador));
+
+    Dono* atual = donos;
+    while(atual!=NULL){
+        char* nome = strdup(atual->nome);//Duplica string
+        char* token = strtok(nome, " "); //dividir a string em partes, pelo espaço
+        char* ultimo = token;
+
+        while (token!=NULL){
+            ultimo = token;
+            token = strtok(NULL, " ");
+        }
+
+        int encontrado = 0;
+        //Procurar o subnome mais comum
+        for(int i =0; i<tamanho; i++){
+            if(strcmp(lista[i].subnome, ultimo)== 0){
+                lista[i].contador++;
+                encontrado = i;
+                break;
+            }
+        }
+        //Cada subnome é guardado apenas uma vez
+        if(!encontrado){
+            if(tamanho == capacidade){
+                capacidade *=2;
+                lista = realloc(lista, capacidade*sizeof(SubnomeContador));
+            }
+            strcpy(lista[tamanho].subnome, ultimo);
+            lista[tamanho].contador = 1;
+            tamanho++;
+        }
+        free(nome);
+        atual = atual->prox;
+    }
+    //Encontrar e imprimir o subnome mais comum
+    int max = 0;
+    char maisComum[50] = ""; //Conteudo inicial vazio
+    for(int i = 0; i<tamanho; i++){
+        if(lista[i].contador > max){
+            max = lista[i].contador;
+            strcpy(maisComum, lista[i].subnome);
+        }
+    }
+
+    printf("Subnome mais comum: %s (ocorrências: %d\n", maisComum, max);
+    free(lista);
+}
