@@ -47,12 +47,13 @@ void registarPassagem(){
     scanf("%d", &nova->codVeiculo);
     getchar();
 
-    printf("Data (dd-mm-aaaa hh:mm:ss): ");
+    printf("Data (dd-mm-aaaa hh:mm:ss): \n");
     fgets(nova->data, sizeof(nova->data), stdin);
     nova->data[strcspn(nova->data, "\n")] = '\0';
 
     printf("Tipo de registo (0=Entrada, 1=Saída): ");
     scanf("%d", &nova->tipoRegisto);
+
 
     nova->prox = passagens;
     passagens = nova;
