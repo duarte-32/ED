@@ -86,6 +86,16 @@ typedef struct {
     int total;
 } MarcaContador;
 
+typedef struct{
+    time_t tempoBase;
+    int milissegundos;
+}TempoComMs;
+
+typedef struct{
+    char subnome[50];
+    int contador;
+}SubnomeContador;
+
 size_t calcularMemoriaTotal(Dono* donos, Veiculo* veiculos, Sensor* sensores, Distancia* distancias, Passagem* passagens);
 void listarDonoSubmenu();
 void listarVeiculoSubmenu();
@@ -96,7 +106,9 @@ void ListarDonos();
 void registarDono();
 void listarCondutoresOrdemAlfa(Dono* listaDonos);
 void listarCondutoresPorContribuinte(Dono* listaDonos);
-
+void exportarParaCSV(Dono* donos, Veiculo* veiculos, Sensor* sensores, Passagem* passagens);
+void exportarParaXML(Dono* donos, Veiculo* veiculos);
+void subnomeMaisComum(Dono* donos);
 
 void CarregarVeiculos(const char* arquivo);
 void ListarVeiculos();
@@ -105,6 +117,7 @@ void registarVeiculos();
 void listarVeiculosPorMatriculaPeriodo(Passagem* passagens, Veiculo* veiculos, const char* dataInicio, const char* dataFim);
 void listarVeiculosOrdenados(Veiculo* listaVeiculos, int criterio);
 Veiculo* obterVeiculo(Veiculo* lista, int cod);
+void carroMaisRapido(Passagem* passagens, Distancia* distancias, Veiculo* veiculos, Dono* donos);
 
 void CarregarSensores(const char* arquivo);
 void CarregarDistancias(const char* arquivo);
@@ -129,5 +142,6 @@ int compararContribuintes(const void* a, const void* b);
 int compararPorMatricula(const void* a, const void* b);
 int compararPorMarca(const void* a, const void* b);
 int compararPorModelo(const void* a, const void* b);
+TempoComMs stringParaTempoComMs(const char* data);
 time_t stringParaTempo(const char* data);
 #endif
