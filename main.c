@@ -164,42 +164,50 @@ void submenuAnalisesAvancadas() {
 
     do {
         printf("\n===== Submenu Análises Avançadas =====\n");
-        printf("12 - Listar velocidades médias por veículo\n");
-        printf("13 - Qual a marca mais rápida\n");
-        printf("14 - Qual o dono mais rápido\n");
-        printf("15 - Velocidade média por código postal\n");
-        printf("16 - Marca mais comum\n");
-        printf("17 - Exportar base de dados para CSV\n");
-        printf("18 - Exportar base de dados para XML\n");
-        printf("0  - Voltar ao menu principal\n");
+        printf("|   1.Listar velocidades médias por veículo\n");
+        printf("|   2.Qual a marca mais rápida              |\n");
+        printf("|   3.Qual o dono mais rápido               |\n");
+        printf("|   4.Velocidade média por código postal    |\n");
+        printf("|   5.Marca mais comum                      |\n");
+        printf("|   6.Exportar base de dados para CSV       |\n");
+        printf("|   7.Exportar base de dados para XML       |\n");
+        printf("|   8.Carro mais rápido                     |\n");
+        printf("|   9.Subnome mais comum dos donos          |\n");
+        printf("|   0.Voltar ao menu principal              |\n");
         printf("Escolha uma opção: ");
         scanf("%d", &opcao);
         getchar(); // limpar \n
 
         switch (opcao) {
-            case 12:
+            case 1:
                 calcularVelocidadesMedias(passagens, distancias, veiculos);
                 break;
-            case 13:
+            case 2:
                 marcaMaisRapida(passagens, distancias, veiculos);
                 break;
-            case 14:
+            case 3:
                 donoMaisRapido(passagens, distancias, veiculos, donos);
                 break;
-            case 15:
+            case 4:
                 printf("Introduza o código postal: ");
                 fgets(codPostal, sizeof(codPostal), stdin);
                 codPostal[strcspn(codPostal, "\n")] = '\0';
                 mediaPorCodigoPostal(passagens, distancias, veiculos, donos, codPostal);
                 break;
-            case 16:
+            case 5:
                 marcaMaisComum(veiculos);
                 break;
-            case 17:
+            case 6:
                 exportarParaCSV(donos, veiculos, sensores, passagens);
                 break;
-            case 18:
+            case 7:
                 exportarParaXML(donos, veiculos);
+                break;
+            case 8:
+                carroMaisRapido(passagens, distancias, veiculos, donos);
+                break;
+            case 9:
+                subnomeMaisComum(donos);
                 break;
             case 0:
                 printf("A voltar ao menu principal...\n");
@@ -230,7 +238,7 @@ int main(){
 		printf("| 5.Listar veículos ordenados   |\n");
 		printf("| 6.Registar Passagem           |\n");
 		printf("| 7.Análise de Circulação       |\n");
-		printf("| 8. Análises Avançadas         |\n");
+		printf("| 8.Análises Avançadas          |\n");
 		printf("| 9.Memoria Total Ocupada       |\n");
 		printf("| 0.Sair do Programa            |\n");
 		printf("----------------------------\n");
