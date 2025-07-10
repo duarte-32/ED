@@ -80,6 +80,15 @@ void registarDono(){
     novo->prox = donos;
     donos = novo;
 
+    //Escrever no ficheiro
+    FILE* f = fopen("donos.txt", "a");
+    if(f==NULL){
+        printf("\nErro ao abrir o ficheiro para escrita.\n");
+        return;
+    }
+
+    fprintf(f, "%d\t%s\t%d\n", novo->numContribuinte, novo->nome, novo->codPostal);
+    fclose(f);
     printf("Dono registado com sucesso.\n");
 }
 
