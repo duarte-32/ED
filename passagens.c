@@ -80,268 +80,489 @@ void registarPassagem(){
 
 
 
-void rankingCirculacao(Passagem* passagens, Distancia* distancias, Veiculo* veiculos, const char* dataInicio, const char* dataFim) {
-    time_t tInicio = stringParaTempo(dataInicio);
-    time_t tFim = stringParaTempo(dataFim);
-    RankingVeiculo ranking[1000];
-    int n = 0;
+void rankingCirculacao(Veiculo* veiculos, Passagem* passagens, Sensor* sensores,
+                      const char* dataInicio, const char* dataFim) {
+    // Fase 1: Contar veículos únicos no período
+    int numVeiculos = 0;
 
+    // Primeiro, contar o número total de veículos
+    int totalVeiculos = 0;
+    Veiculo* v = veiculos;
+    while (v != NULL) {
+        totalVeiculos++;
+        v = v->prox;
+    }
+
+    // Alocar array para códigos de veículos
+    int* codigosVeiculos = malloc(totalVeiculos * sizeof(int));
+    if (!codigosVeiculos) {
+        printf("Erro de alocação de memória.\n");
+        return;
+    }
+
+    // Identificar veículos únicos no período
     Passagem* p = passagens;
-    while (p) {
-        if (p->tipoRegisto == 0) { // entrada
-            Passagem* s = p->prox;
-            while (s) {
-                if (s->codVeiculo == p->codVeiculo && s->tipoRegisto == 1) {
-                    time_t t1 = stringParaTempo(p->data);
-                    time_t t2 = stringParaTempo(s->data);
-                    if (t1 >= tInicio && t2 <= tFim && difftime(t2, t1) > 0) {
-                        float d = obterDistanciaEntreSensores(distancias, p->idSensor, s->idSensor);
-                        if (d >= 0) {
-                            int i, existe = 0;
-                            for (i = 0; i < n; i++) {
-                                if (ranking[i].codVeiculo == p->codVeiculo) {
-                                    ranking[i].kmTotal += d;
-                                    existe = 1;
+    while (p != NULL) {
+        if (strcmp(p->data, dataInicio) >= 0 && strcmp(p->data, dataFim) <= 0) {
+            int encontrado = 0;
+            for (int i = 0; i < numVeiculos; i++) {
+                if (codigosVeiculos[i] == p->codVeiculo) {
+                    encontrado = 1;
+                    break;
+                }
+            }
+            if (!encontrado) {
+                codigosVeiculos[numVeiculos++] = p->codVeiculo;
+            }
+        }
+        p = p->prox;
+    }
+
+    // Fase 2: Calcular quilometragem para cada veículo
+    RankingVeiculo* ranking = malloc(numVeiculos * sizeof(RankingVeiculo));
+    if (!ranking) {
+        free(codigosVeiculos);
+        printf("Erro de alocação de memória.\n");
+        return;
+    }
+
+    for (int i = 0; i < numVeiculos; i++) {
+        ranking[i].codVeiculo = codigosVeiculos[i];
+        ranking[i].kmTotal = 0.0;
+
+        // Encontrar todas as passagens de entrada e saída para este veículo
+        Passagem* entrada = NULL;
+        Passagem* atual = passagens;
+
+        while (atual != NULL) {
+            if (atual->codVeiculo == codigosVeiculos[i] &&
+                strcmp(atual->data, dataInicio) >= 0 &&
+                strcmp(atual->data, dataFim) <= 0) {
+
+                if (atual->tipoRegisto == 0) { // Entrada
+                    entrada = atual;
+                } else if (atual->tipoRegisto == 1 && entrada != NULL) { // Saída
+                    // Calcular distância entre os sensores
+                    float distancia = encontrarDistanciaEntreSensores(sensores, entrada->idSensor, atual->idSensor);
+                    if (distancia > 0) {
+                        ranking[i].kmTotal += distancia;
+                    }
+                    entrada = NULL;
+                }
+            }
+            atual = atual->prox;
+        }
+    }
+
+    // Fase 3: Ordenar o ranking
+    qsort(ranking, numVeiculos, sizeof(RankingVeiculo), compararRankingVeiculos);
+
+    // Fase 4: Imprimir resultados
+    printf("\nRanking de Circulação entre %s e %s:\n", dataInicio, dataFim);
+    printf("------------------------------------------------\n");
+    printf("Posição\tMatrícula\tMarca\tModelo\tKm Percorridos\n");
+    printf("------------------------------------------------\n");
+
+    for (int i = 0; i < numVeiculos; i++) {
+        Veiculo* veic = encontrarVeiculoPorCodigo(veiculos, ranking[i].codVeiculo);
+        if (veic != NULL) {
+            printf("%d\t%s\t%s\t%s\t%.2f km\n",
+                   i+1, veic->matricula, veic->marca, veic->modelo, ranking[i].kmTotal);
+        }
+    }
+    printf("------------------------------------------------\n");
+
+    // Liberar memória
+    free(codigosVeiculos);
+    free(ranking);
+}
+
+void rankingPorMarca(Veiculo* veiculos, Passagem* passagens, Distancia* distancias,
+                    const char* dataInicio, const char* dataFim) {
+    // Fase 1: Contar marcas únicas
+    int numMarcas = 0;
+    int maxMarcas = 10; // Tamanho inicial do array
+    char** marcas = malloc(maxMarcas * sizeof(char*));
+
+    // Coletar marcas únicas
+    Veiculo* v = veiculos;
+    while (v != NULL) {
+        int encontrada = 0;
+
+        // Verificar se a marca já está na lista
+        for (int i = 0; i < numMarcas; i++) {
+            if (strcmp(marcas[i], v->marca) == 0) {
+                encontrada = 1;
+                break;
+            }
+        }
+
+        // Se não encontrada, adicionar
+        if (!encontrada) {
+            // Redimensionar array se necessário
+            if (numMarcas >= maxMarcas) {
+                maxMarcas *= 2;
+                marcas = realloc(marcas, maxMarcas * sizeof(char*));
+            }
+
+            marcas[numMarcas] = malloc(50 * sizeof(char));
+            strcpy(marcas[numMarcas], v->marca);
+            numMarcas++;
+        }
+        v = v->prox;
+    }
+
+    // Fase 2: Calcular quilometragem por marca
+    RankingMarca* ranking = malloc(numMarcas * sizeof(RankingMarca));
+    for (int i = 0; i < numMarcas; i++) {
+        strcpy(ranking[i].marca, marcas[i]);
+        ranking[i].kmTotal = 0.0;
+
+        // Para cada veículo desta marca
+        v = veiculos;
+        while (v != NULL) {
+            if (strcmp(v->marca, marcas[i]) == 0) {
+                // Procurar passagens deste veículo no período
+                Passagem* entrada = NULL;
+                Passagem* p = passagens;
+
+                while (p != NULL) {
+                    if (p->codVeiculo == v->codVeiculo &&
+                        strcmp(p->data, dataInicio) >= 0 &&
+                        strcmp(p->data, dataFim) <= 0) {
+
+                        if (p->tipoRegisto == 0) { // Entrada
+                            entrada = p;
+                        }
+                        else if (p->tipoRegisto == 1 && entrada != NULL) { // Saída
+                            float distancia = encontrarDistancia(distancias, entrada->idSensor, p->idSensor);
+                            if (distancia > 0) {
+                                ranking[i].kmTotal += distancia;
+                            }
+                            entrada = NULL;
+                        }
+                    }
+                    p = p->prox;
+                }
+            }
+            v = v->prox;
+        }
+    }
+
+    // Fase 3: Ordenar e exibir resultados
+    qsort(ranking, numMarcas, sizeof(RankingMarca), compararRankingMarcas);
+
+    printf("\nRanking por Marca (%s a %s)\n", dataInicio, dataFim);
+    printf("---------------------------------\n");
+    printf("Posição\tMarca\t\tKm Totais\n");
+    printf("---------------------------------\n");
+
+    for (int i = 0; i < numMarcas; i++) {
+        printf("%d\t%-10s\t%.2f km\n", i+1, ranking[i].marca, ranking[i].kmTotal);
+    }
+    printf("---------------------------------\n");
+
+    // Liberar memória
+    for (int i = 0; i < numMarcas; i++) {
+        free(marcas[i]);
+    }
+    free(marcas);
+    free(ranking);
+}
+
+
+void listarInfracoesVelocidade(Passagem* passagens, Veiculo* veiculos, Sensor* sensores,
+                              const char* dataInicio, const char* dataFim) {
+    // Fase 1: Contar número total de passagens para dimensionar arrays
+    int totalPassagens = 0;
+    Passagem* p = passagens;
+    while (p != NULL) {
+        totalPassagens++;
+        p = p->prox;
+    }
+
+    // Alocar arrays temporários
+    int* codVeiculos = malloc(totalPassagens * sizeof(int));
+    int* sensoresEntrada = malloc(totalPassagens * sizeof(int));
+    int* sensoresSaida = malloc(totalPassagens * sizeof(int));
+    char** datasEntrada = malloc(totalPassagens * sizeof(char*));
+    char** datasSaida = malloc(totalPassagens * sizeof(char*));
+
+    for (int i = 0; i < totalPassagens; i++) {
+        datasEntrada[i] = malloc(20 * sizeof(char));
+        datasSaida[i] = malloc(20 * sizeof(char));
+    }
+
+    // Fase 2: Identificar pares de entrada/saída válidos no período
+    int numPares = 0;
+    Passagem* entrada = NULL;
+    p = passagens;
+
+    while (p != NULL) {
+        if (strcmp(p->data, dataInicio) >= 0 && strcmp(p->data, dataFim) <= 0) {
+            if (p->tipoRegisto == 0) { // Registro de entrada
+                entrada = p;
+            }
+            else if (p->tipoRegisto == 1 && entrada != NULL && entrada->codVeiculo == p->codVeiculo) {
+                // Registro de saída correspondente a uma entrada
+                codVeiculos[numPares] = p->codVeiculo;
+                sensoresEntrada[numPares] = entrada->idSensor;
+                sensoresSaida[numPares] = p->idSensor;
+                strcpy(datasEntrada[numPares], entrada->data);
+                strcpy(datasSaida[numPares], p->data);
+                numPares++;
+                entrada = NULL;
+            }
+        }
+        p = p->prox;
+    }
+
+    // Fase 3: Verificar infrações de velocidade
+    Infracao* infracoes = malloc(numPares * sizeof(Infracao));
+    int numInfracoes = 0;
+
+    for (int i = 0; i < numPares; i++) {
+        float distancia = encontrarDistanciaEntreSensores(sensores, sensoresEntrada[i], sensoresSaida[i]);
+        float horas = calcularDiferencaHoras(datasEntrada[i], datasSaida[i]);
+
+        if (distancia > 0 && horas > 0) {
+            float velocidade = distancia / horas;
+
+            if (velocidade > 120.0) { // Limite de velocidade excedido
+                Veiculo* v = encontrarVeiculoPorCodigo(veiculos, codVeiculos[i]);
+                if (v != NULL) {
+                    // Verificar se já existe registro para esta matrícula
+                    int encontrada = 0;
+                    for (int j = 0; j < numInfracoes; j++) {
+                        if (strcmp(infracoes[j].matricula, v->matricula) == 0) {
+                            infracoes[j].numInfracoes++;
+                            encontrada = 1;
+                            break;
+                        }
+                    }
+
+                    if (!encontrada) {
+                        strcpy(infracoes[numInfracoes].matricula, v->matricula);
+                        infracoes[numInfracoes].numInfracoes = 1;
+                        numInfracoes++;
+                    }
+                }
+            }
+        }
+    }
+
+    // Fase 4: Ordenar e exibir resultados
+    qsort(infracoes, numInfracoes, sizeof(Infracao), compararInfracoes);
+
+    printf("\nInfrações de Velocidade (%s a %s)\n", dataInicio, dataFim);
+    printf("---------------------------------\n");
+    printf("Matrícula\tNº Infrações\n");
+    printf("---------------------------------\n");
+
+    for (int i = 0; i < numInfracoes; i++) {
+        printf("%s\t%d\n", infracoes[i].matricula, infracoes[i].numInfracoes);
+    }
+
+    if (numInfracoes == 0) {
+        printf("Nenhuma infração registrada no período.\n");
+    }
+    printf("---------------------------------\n");
+
+    // Liberar memória
+    for (int i = 0; i < totalPassagens; i++) {
+        free(datasEntrada[i]);
+        free(datasSaida[i]);
+    }
+    free(datasEntrada);
+    free(datasSaida);
+    free(codVeiculos);
+    free(sensoresEntrada);
+    free(sensoresSaida);
+    free(infracoes);
+}
+
+void rankingInfracoesPorVeiculo(Passagem* passagens, Distancia* distancias, Veiculo* veiculos,
+                               const char* dataInicio, const char* dataFim) {
+    // Fase 1: Contar número total de veículos para dimensionar array
+    int totalVeiculos = 0;
+    Veiculo* v = veiculos;
+    while (v != NULL) {
+        totalVeiculos++;
+        v = v->prox;
+    }
+
+    // Alocar array para infrações
+    Infracao* infracoes = malloc(totalVeiculos * sizeof(Infracao));
+    int numInfracoes = 0;
+
+    // Fase 2: Processar todas as passagens no período
+    Passagem* entrada = NULL;
+    Passagem* atual = passagens;
+
+    while (atual != NULL) {
+        if (strcmp(atual->data, dataInicio) >= 0 && strcmp(atual->data, dataFim) <= 0) {
+            if (atual->tipoRegisto == 0) { // Registro de entrada
+                entrada = atual;
+            }
+            else if (atual->tipoRegisto == 1 && entrada != NULL && entrada->codVeiculo == atual->codVeiculo) {
+                // Registro de saída correspondente
+                float distancia = encontrarDistanciaEntreSensores(distancias, entrada->idSensor, atual->idSensor);
+                float horas = calcularDiferencaHoras(entrada->data, atual->data);
+
+                if (distancia > 0 && horas > 0) {
+                    float velocidade = distancia / horas;
+
+                    if (velocidade > 120.0) { // Limite de velocidade excedido
+                        Veiculo* veic = encontrarVeiculoPorCodigo(veiculos, atual->codVeiculo);
+                        if (veic != NULL) {
+                            // Verificar se já existe registro para esta matrícula
+                            int encontrada = 0;
+                            for (int i = 0; i < numInfracoes; i++) {
+                                if (strcmp(infracoes[i].matricula, veic->matricula) == 0) {
+                                    infracoes[i].numInfracoes++;
+                                    encontrada = 1;
                                     break;
                                 }
                             }
-                            if (!existe) {
-                                ranking[n].codVeiculo = p->codVeiculo;
-                                ranking[n].kmTotal = d;
-                                n++;
+
+                            if (!encontrada) {
+                                strcpy(infracoes[numInfracoes].matricula, veic->matricula);
+                                infracoes[numInfracoes].numInfracoes = 1;
+                                numInfracoes++;
                             }
                         }
-                        break;
                     }
                 }
-                s = s->prox;
+                entrada = NULL;
             }
         }
-        p = p->prox;
+        atual = atual->prox;
     }
 
-    // Ordenar
-    for (int i = 0; i < n-1; i++)
-        for (int j = i+1; j < n; j++)
-            if (ranking[j].kmTotal > ranking[i].kmTotal) {
-                RankingVeiculo tmp = ranking[i];
-                ranking[i] = ranking[j];
-                ranking[j] = tmp;
-            }
+    // Fase 3: Ordenar e exibir resultados
+    qsort(infracoes, numInfracoes, sizeof(Infracao), compararInfracoes);
 
-    // Mostrar
-    printf("\n--- Ranking de circulação por veículo ---\n");
-    for (int i = 0; i < n; i++) {
-        Veiculo* v = obterVeiculo(veiculos, ranking[i].codVeiculo);
-        if (v)
-            printf("Matrícula: %s | Marca: %s | Modelo: %s | KM: %.2f\n", v->matricula, v->marca, v->modelo, ranking[i].kmTotal);
+    printf("\nRanking de Infrações por Veículo (%s a %s)\n", dataInicio, dataFim);
+    printf("------------------------------------------------\n");
+    printf("Posição\tMatrícula\tMarca\tModelo\tNº Infrações\n");
+    printf("------------------------------------------------\n");
+
+    for (int i = 0; i < numInfracoes; i++) {
+        Veiculo* veic = encontrarVeiculoPorMatricula(veiculos, infracoes[i].matricula);
+        if (veic != NULL) {
+            printf("%d\t%s\t%s\t%s\t%d\n",
+                   i+1, veic->matricula, veic->marca, veic->modelo, infracoes[i].numInfracoes);
+        }
     }
+
+    if (numInfracoes == 0) {
+        printf("Nenhuma infração registrada no período.\n");
+    }
+    printf("------------------------------------------------\n");
+
+    // Liberar memória
+    free(infracoes);
 }
 
+void listarVelocidadesMedias(Passagem* passagens, Distancia* distancias, Veiculo* veiculos,
+                           const char* dataInicio, const char* dataFim) {
+    // Fase 1: Contar veículos únicos no período
+    int numVeiculos = 0;
+    int* codVeiculos = NULL;
 
-void rankingPorMarca(Passagem* passagens, Distancia* distancias, Veiculo* veiculos, const char* dataInicio, const char* dataFim) {
-    time_t tInicio = stringParaTempo(dataInicio);
-    time_t tFim = stringParaTempo(dataFim);
-    RankingMarca marcas[100];
-    int n = 0;
+    // Primeiro contar o número total de veículos para alocação
+    int totalVeiculos = 0;
+    Veiculo* v = veiculos;
+    while (v != NULL) {
+        totalVeiculos++;
+        v = v->prox;
+    }
 
+    // Alocar array para códigos de veículos
+    codVeiculos = malloc(totalVeiculos * sizeof(int));
+
+    // Identificar veículos únicos no período
     Passagem* p = passagens;
-    while (p) {
-        if (p->tipoRegisto == 0) {
-            Passagem* s = p->prox;
-            while (s) {
-                if (s->codVeiculo == p->codVeiculo && s->tipoRegisto == 1) {
-                    time_t t1 = stringParaTempo(p->data);
-                    time_t t2 = stringParaTempo(s->data);
-                    if (t1 >= tInicio && t2 <= tFim && difftime(t2, t1) > 0) {
-                        float d = obterDistanciaEntreSensores(distancias, p->idSensor, s->idSensor);
-                        if (d >= 0) {
-                            Veiculo* v = obterVeiculo(veiculos, p->codVeiculo);
-                            if (v) {
-                                int i, existe = 0;
-                                for (i = 0; i < n; i++) {
-                                    if (strcmp(marcas[i].marca, v->marca) == 0) {
-                                        marcas[i].kmTotal += d;
-                                        existe = 1;
-                                        break;
-                                    }
-                                }
-                                if (!existe) {
-                                    strcpy(marcas[n].marca, v->marca);
-                                    marcas[n].kmTotal = d;
-                                    n++;
-                                }
-                            }
-                        }
-                        break;
-                    }
+    while (p != NULL) {
+        if (strcmp(p->data, dataInicio) >= 0 && strcmp(p->data, dataFim) <= 0) {
+            int encontrado = 0;
+            for (int i = 0; i < numVeiculos; i++) {
+                if (codVeiculos[i] == p->codVeiculo) {
+                    encontrado = 1;
+                    break;
                 }
-                s = s->prox;
+            }
+            if (!encontrado) {
+                codVeiculos[numVeiculos++] = p->codVeiculo;
             }
         }
         p = p->prox;
     }
 
-    // Ordenar
-    for (int i = 0; i < n-1; i++)
-        for (int j = i+1; j < n; j++)
-            if (marcas[j].kmTotal > marcas[i].kmTotal) {
-                RankingMarca tmp = marcas[i];
-                marcas[i] = marcas[j];
-                marcas[j] = tmp;
-            }
+    // Fase 2: Calcular velocidades médias
+    VelocidadeMedia* velocidades = malloc(numVeiculos * sizeof(VelocidadeMedia));
 
-    printf("\n--- Ranking por marca ---\n");
-    for (int i = 0; i < n; i++)
-        printf("Marca: %s | KM: %.2f\n", marcas[i].marca, marcas[i].kmTotal);
-}
+    for (int i = 0; i < numVeiculos; i++) {
+        Veiculo* veic = encontrarVeiculoPorCodigo(veiculos, codVeiculos[i]);
+        if (veic != NULL) {
+            strcpy(velocidades[i].matricula, veic->matricula);
 
-void listarInfracoes(Passagem* passagens, Distancia* distancias, Veiculo* veiculos, const char* dataInicio, const char* dataFim) {
-    time_t tInicio = stringParaTempo(dataInicio);
-    time_t tFim = stringParaTempo(dataFim);
+            float totalKm = 0.0;
+            float totalHoras = 0.0;
+            Passagem* entrada = NULL;
+            Passagem* atual = passagens;
 
-    printf("\n--- Veículos com velocidade média > 120 km/h ---\n");
+            while (atual != NULL) {
+                if (atual->codVeiculo == codVeiculos[i] &&
+                    strcmp(atual->data, dataInicio) >= 0 &&
+                    strcmp(atual->data, dataFim) <= 0) {
 
-    Passagem* p = passagens;
-    while (p) {
-        if (p->tipoRegisto == 0) {
-            Passagem* s = p->prox;
-            while (s) {
-                if (s->codVeiculo == p->codVeiculo && s->tipoRegisto == 1) {
-                    time_t t1 = stringParaTempo(p->data);
-                    time_t t2 = stringParaTempo(s->data);
-                    double horas = difftime(t2, t1) / 3600.0;
+                    if (atual->tipoRegisto == 0) { // Entrada
+                        entrada = atual;
+                    }
+                    else if (atual->tipoRegisto == 1 && entrada != NULL) { // Saída
+                        float distancia = encontrarDistanciaEntreSensores(distancias, entrada->idSensor, atual->idSensor);
+                        float horas = calcularDiferencaHoras(entrada->data, atual->data);
 
-                    if (t1 >= tInicio && t2 <= tFim && horas > 0) {
-                        float dist = obterDistanciaEntreSensores(distancias, p->idSensor, s->idSensor);
-                        float vmed = dist / horas;
-
-                        if (vmed > 120.0) {
-                            Veiculo* v = obterVeiculo(veiculos, p->codVeiculo);
-                            if (v) printf("Matrícula: %s | Velocidade média: %.2f km/h\n", v->matricula, vmed);
+                        if (distancia > 0 && horas > 0) {
+                            totalKm += distancia;
+                            totalHoras += horas;
                         }
-                        break;
+                        entrada = NULL;
                     }
                 }
-                s = s->prox;
+                atual = atual->prox;
             }
+
+            velocidades[i].velocidadeMedia = (totalHoras > 0) ? (totalKm / totalHoras) : 0.0;
         }
-        p = p->prox;
     }
+
+    // Fase 3: Ordenar e exibir resultados
+    qsort(velocidades, numVeiculos, sizeof(VelocidadeMedia), compararVelocidadesMedias);
+
+    printf("\nVelocidades Médias (%s a %s)\n", dataInicio, dataFim);
+    printf("------------------------------------------------\n");
+    printf("Posição\tMatrícula\tMarca\tModelo\tVelocidade Média\n");
+    printf("------------------------------------------------\n");
+
+    for (int i = 0; i < numVeiculos; i++) {
+        Veiculo* veic = encontrarVeiculoPorCodigo(veiculos, codVeiculos[i]);
+        if (veic != NULL && velocidades[i].velocidadeMedia > 0) {
+            printf("%d\t%s\t%s\t%s\t%.2f km/h\n",
+                   i+1, veic->matricula, veic->marca, veic->modelo, velocidades[i].velocidadeMedia);
+        }
+    }
+
+    if (numVeiculos == 0) {
+        printf("Nenhum veículo circulou no período especificado.\n");
+    }
+    printf("------------------------------------------------\n");
+
+    // Liberar memória
+    free(codVeiculos);
+    free(velocidades);
 }
-
-
-void rankingInfracoes(Passagem* passagens, Distancia* distancias, Veiculo* veiculos, const char* dataInicio, const char* dataFim) {
-    time_t tInicio = stringParaTempo(dataInicio);
-    time_t tFim = stringParaTempo(dataFim);
-    InfracaoVeiculo lista[1000];
-    int n = 0;
-
-    Passagem* p = passagens;
-    while (p) {
-        if (p->tipoRegisto == 0) {
-            Passagem* s = p->prox;
-            while (s) {
-                if (s->codVeiculo == p->codVeiculo && s->tipoRegisto == 1) {
-                    time_t t1 = stringParaTempo(p->data);
-                    time_t t2 = stringParaTempo(s->data);
-                    double horas = difftime(t2, t1) / 3600.0;
-
-                    if (t1 >= tInicio && t2 <= tFim && horas > 0) {
-                        float dist = obterDistanciaEntreSensores(distancias, p->idSensor, s->idSensor);
-                        float vmed = dist / horas;
-
-                        if (vmed > 120.0) {
-                            int i, existe = 0;
-                            for (i = 0; i < n; i++) {
-                                if (lista[i].codVeiculo == p->codVeiculo) {
-                                    lista[i].numInfracoes++;
-                                    existe = 1;
-                                    break;
-                                }
-                            }
-                            if (!existe) {
-                                lista[n].codVeiculo = p->codVeiculo;
-                                lista[n].numInfracoes = 1;
-                                n++;
-                            }
-                        }
-                        break;
-                    }
-                }
-                s = s->prox;
-            }
-        }
-        p = p->prox;
-    }
-
-    // Ordenar
-    for (int i = 0; i < n-1; i++)
-        for (int j = i+1; j < n; j++)
-            if (lista[j].numInfracoes > lista[i].numInfracoes) {
-                InfracaoVeiculo tmp = lista[i];
-                lista[i] = lista[j];
-                lista[j] = tmp;
-            }
-
-    printf("\n--- Ranking de infrações por veículo ---\n");
-    for (int i = 0; i < n; i++) {
-        Veiculo* v = obterVeiculo(veiculos, lista[i].codVeiculo);
-        if (v) printf("Matrícula: %s | Infrações: %d\n", v->matricula, lista[i].numInfracoes);
-    }
-}
-
-void calcularVelocidadesMedias(Passagem* passagens, Distancia* distancias, Veiculo* veiculos) {
-    VelocidadeMedia lista[1000];
-    int n = 0;
-
-    for (Passagem* p = passagens; p; p = p->prox) {
-        if (p->tipoRegisto == 0) {
-            for (Passagem* s = p->prox; s; s = s->prox) {
-                if (s->codVeiculo == p->codVeiculo && s->tipoRegisto == 1) {
-                    time_t t1 = stringParaTempo(p->data);
-                    time_t t2 = stringParaTempo(s->data);
-                    double h = difftime(t2, t1) / 3600.0;
-
-                    if (h > 0) {
-                        float dist = obterDistanciaEntreSensores(distancias, p->idSensor, s->idSensor);
-                        if (dist >= 0) {
-                            int i, found = 0;
-                            for (i = 0; i < n; i++) {
-                                if (lista[i].codVeiculo == p->codVeiculo) {
-                                    lista[i].totalKm += dist;
-                                    lista[i].totalHoras += h;
-                                    found = 1;
-                                    break;
-                                }
-                            }
-                            if (!found) {
-                                lista[n].codVeiculo = p->codVeiculo;
-                                lista[n].totalKm = dist;
-                                lista[n].totalHoras = h;
-                                n++;
-                            }
-                        }else{
-                            printf("Distância não encontrada entre sensores %d e %d.\n", p->idSensor, s->idSensor);
-                        }
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
-    printf("\n--- Velocidade média por veículo ---\n");
-    for (int i = 0; i < n; i++) {
-        Veiculo* v = obterVeiculo(veiculos, lista[i].codVeiculo);
-        if (v && lista[i].totalHoras > 0){
-            float velMedia = lista[i].totalKm/lista[i].totalHoras;
-            printf("Matrícula: %s | Vel. Média: %.2f km/h\n", v->matricula, velMedia);
-        }
-    }
-}
-
-
 
 void marcaMaisRapida(Passagem* passagens, Distancia* distancias, Veiculo* veiculos) {
     MarcaVelocidade lista[100];
