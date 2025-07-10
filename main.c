@@ -25,7 +25,7 @@ size_t calcularMemoriaTotal(Dono* donos, Veiculo* veiculos, Sensor* sensores, Di
     }
 
     Sensor* s = sensores;
-    while(d != NULL){
+    while(s != NULL){
          total += sizeof(Sensor);
         s = s->prox;
     }
@@ -111,15 +111,7 @@ void subMenuAnaliseCirculacao(){
     limparBuffer(); //Limpar \n pendente do scnaf anterior
 
     printf("\n--- Submenu Análise de Circulação --\n");
-    printf("Introduza o período a analisar: \n");
 
-    printf("Data início (dd-mm-yyyy hh:mm:ss:):");
-    fgets(dataInicio, sizeof(dataInicio), stdin);
-    dataInicio[strcspn(dataInicio, "\n")] = '\0';
-
-    printf("Data fim (dd-mm-yyyy hh:mm:ss:): ");
-    fgets(dataFim, sizeof(dataFim), stdin);
-    dataFim[strcspn(dataFim, "\n")] = '\0';
 
      do {
         printf("\n--- Análises Disponíveis ---\n");
@@ -135,19 +127,45 @@ void subMenuAnaliseCirculacao(){
 
         switch (opcao) {
             case 1:
-                listarVeiculosPorMatriculaPeriodo(passagens, veiculos, dataInicio, dataFim);
+
+                printf("Digite a data de inicio (DD-MM-AAAA HH:MM:SS.mmm): ");
+                scanf(" %[^\n]", dataInicio);
+                printf("Digite a data de fim (DD-MM-AAAA HH:MM:SS.mmm): ");
+                scanf(" %[^\n]", dataFim);
+
+                listarVeiculosNoPeriodo(veiculos, passagens, dataInicio, dataFim);
                 break;
             case 2:
-                rankingCirculacao(passagens, distancias, veiculos, dataInicio, dataFim);
+                printf("Digite a data de inicio (DD-MM-AAAA HH:MM:SS.mmm): ");
+                scanf(" %[^\n]", dataInicio);
+                printf("Digite a data de fim (DD-MM-AAAA HH:MM:SS.mmm): ");
+                scanf(" %[^\n]", dataFim);
+                rankingCirculacao(veiculos, passagens, sensores,
+                      dataInicio, dataFim);
                 break;
             case 3:
-                rankingPorMarca(passagens, distancias, veiculos, dataInicio, dataFim);
+                printf("Digite a data de inicio (DD-MM-AAAA HH:MM:SS.mmm): ");
+                scanf(" %[^\n]", dataInicio);
+                printf("Digite a data de fim (DD-MM-AAAA HH:MM:SS.mmm): ");
+                scanf(" %[^\n]", dataFim);
+                rankingPorMarca(veiculos, passagens, distancias,
+                    dataInicio, dataFim);
                 break;
             case 4:
-                listarInfracoes(passagens, distancias, veiculos, dataInicio, dataFim);
+                printf("Digite a data de inicio (DD-MM-AAAA HH:MM:SS.mmm): ");
+                scanf(" %[^\n]", dataInicio);
+                printf("Digite a data de fim (DD-MM-AAAA HH:MM:SS.mmm): ");
+                scanf(" %[^\n]", dataFim);
+                listarInfracoesVelocidade(passagens,  veiculos,  sensores,
+                              dataInicio,  dataFim);
                 break;
             case 5:
-                rankingInfracoes(passagens, distancias, veiculos, dataInicio, dataFim);
+                printf("Digite a data de inicio (DD-MM-AAAA HH:MM:SS.mmm): ");
+                scanf(" %[^\n]", dataInicio);
+                printf("Digite a data de fim (DD-MM-AAAA HH:MM:SS.mmm): ");
+                scanf(" %[^\n]", dataFim);
+                rankingInfracoesPorVeiculo( passagens,  distancias,  veiculos,
+                                dataInicio, dataFim);
                 break;
             case 0:
                 printf("A voltar ao menu principal...\n");
@@ -161,6 +179,7 @@ void subMenuAnaliseCirculacao(){
 void submenuAnalisesAvancadas() {
     int opcao;
     char codPostal[20];
+    char dataInicio[30], dataFim[30];
 
     do {
         printf("\n===== Submenu Análises Avançadas =====\n");
@@ -180,7 +199,12 @@ void submenuAnalisesAvancadas() {
 
         switch (opcao) {
             case 1:
-                calcularVelocidadesMedias(passagens, distancias, veiculos);
+                printf("Digite a data de inicio (DD-MM-AAAA HH:MM:SS.mmm): ");
+                scanf(" %[^\n]", dataInicio);
+                printf("Digite a data de fim (DD-MM-AAAA HH:MM:SS.mmm): ");
+                scanf(" %[^\n]", dataFim);
+                listarVelocidadesMedias(passagens, distancias,  veiculos,
+                            dataInicio, dataFim);
                 break;
             case 2:
                 marcaMaisRapida(passagens, distancias, veiculos);
