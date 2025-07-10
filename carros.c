@@ -88,69 +88,91 @@ void pesquisarMatricula() {
 
 }
 */
-void listarVeiculosPorMatriculaPeriodo(Passagem* passagens, Veiculo* veiculos, const char* dataInicio, const char* dataFim){
 
-   Veiculo** veiculosEncontrados = NULL;
-   int tamanho = 0;
-   int capacidade = 10;
-   veiculosEncontrados = malloc(capacidade*sizeof(Veiculo*));
 
-   time_t inicio = stringParaTempo(dataInicio);
-   time_t fim = stringParaTempo(dataFim);
+void listarVeiculosNoPeriodo(Veiculo* veiculos, Passagem* passagens, const char* dataInicio, const char* dataFim) {
+    // Contar quantos veículos únicos circularam no período
+    int count = 0;
+    Passagem* p = passagens;
 
-   //Evitar duplicados - lista de codVeiculos já adicionados
-   int* codsAdicionados = malloc(capacidade*sizeof(int));
-   int numCods = 0;
-
-   for(Passagem* p = passagens; p!=NULL; p=p->prox){
-        time_t tempoPassagem = stringParaTempo(p->data);
-
-        if(tempoPassagem>= inicio && tempoPassagem <= fim){
-            //Verificar se o veiculo atual já foi adicionado
-            int jaAdicionado = 0;
-            for(int i = 0; i< numCods; i++){
-                    if(codsAdicionados[i] == p->codVeiculo){
-                        jaAdicionado = 1;
-                        break;
-                    }
+    // Primeiro passagem: contar veículos únicos no período
+    while (p != NULL) {
+        if (strcmp(p->data, dataInicio) >= 0 && strcmp(p->data, dataFim) <= 0) {
+            // Verificar se já foi contado
+            int jaContado = 0;
+            Passagem* temp = passagens;
+            while (temp != p) {
+                if (temp->codVeiculo == p->codVeiculo &&
+                    strcmp(temp->data, dataInicio) >= 0 &&
+                    strcmp(temp->data, dataFim) <= 0) {
+                    jaContado = 1;
+                    break;
+                }
+                temp = temp->prox;
             }
-            if(!jaAdicionado){
-                //Obter o veiculo correspondente
-                Veiculo* v = obterVeiculo(veiculos, p->codVeiculo);
-                //Guardar ponteiros para veiculos e realocar memória para os arrays
-                if(v!=NULL){
-                    if(tamanho == capacidade){
-                        capacidade *=2;
-                        veiculosEncontrados = realloc(veiculosEncontrados, capacidade*sizeof(Veiculo*));
-                        codsAdicionados = realloc(codsAdicionados, capacidade*sizeof(int));
-                    }
-                    veiculosEncontrados[tamanho++] = v;
-                    codsAdicionados[numCods++] = p->codVeiculo;
+            if (!jaContado) {
+                count++;
+            }
+        }
+        p = p->prox;
+    }
+
+    if (count == 0) {
+        printf("Nenhum veículo circulou no período especificado.\n");
+        return;
+    }
+
+    // Alocar memória para os veículos no período
+    VeiculoPeriodo* veiculosPeriodo = malloc(count * sizeof(VeiculoPeriodo));
+    if (veiculosPeriodo == NULL) {
+        printf("Erro ao alocar memória.\n");
+        return;
+    }
+
+    // Segunda passagem: preencher o array
+    int index = 0;
+    p = passagens;
+    while (p != NULL && index < count) {
+        if (strcmp(p->data, dataInicio) >= 0 && strcmp(p->data, dataFim) <= 0) {
+            // Verificar se já está no array
+            int jaInserido = 0;
+            for (int i = 0; i < index; i++) {
+                Veiculo* v = encontrarVeiculoPorCodigo(veiculos, p->codVeiculo);
+                if (v != NULL && strcmp(veiculosPeriodo[i].matricula, v->matricula) == 0) {
+                    jaInserido = 1;
+                    break;
+                }
+            }
+
+            if (!jaInserido) {
+                Veiculo* v = encontrarVeiculoPorCodigo(veiculos, p->codVeiculo);
+                if (v != NULL) {
+                    strcpy(veiculosPeriodo[index].matricula, v->matricula);
+                    strcpy(veiculosPeriodo[index].marca, v->marca);
+                    strcpy(veiculosPeriodo[index].modelo, v->modelo);
+                    index++;
                 }
             }
         }
-   }
+        p = p->prox;
+    }
 
-   if(tamanho == 0){
-    printf("\nNenhum veículo circulou entre %s e %s.\n", dataInicio, dataFim);
-   }else{
-       qsort(veiculosEncontrados, tamanho, sizeof(Veiculo*), compararPorMatricula);
+    // Ordenar por matrícula (usando qsort)
+    qsort(veiculosPeriodo, count, sizeof(VeiculoPeriodo), compararPorMatricula);
 
-       //Listar
-       printf("\n--- Veículos que circularam entre %s e %s (ordenados por matrícula) ---\n", dataInicio, dataFim);
-       for(int i =0; i<tamanho; i++){
-        printf("Matrícula: %s | MArca: %s | Modelo: %s | Ano: %d | Código: %d | NIF: %d\n",
-                veiculosEncontrados[i]->matricula,
-                veiculosEncontrados[i]->marca,
-                veiculosEncontrados[i]->modelo,
-                veiculosEncontrados[i]->ano,
-                veiculosEncontrados[i]->codVeiculo,
-                veiculosEncontrados[i]->dono);
-       }
-   }
-   free(veiculosEncontrados);
-   free(codsAdicionados);
+    // Imprimir resultados
+    printf("Veiculos que circularam entre %s e %s:\n", dataInicio, dataFim);
+    printf("Matricula\tMarca\tModelo\n");
+    for (int i = 0; i < count; i++) {
+        printf("%s\t%s\t%s\n", veiculosPeriodo[i].matricula,
+               veiculosPeriodo[i].marca, veiculosPeriodo[i].modelo);
+    }
+
+    free(veiculosPeriodo);
 }
+
+
+
 
 void registarVeiculos(){
     Veiculo* novo = malloc(sizeof(Veiculo));
