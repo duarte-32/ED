@@ -95,17 +95,17 @@ void listarVeiculosPorMatriculaPeriodo(Passagem* passagens, Veiculo* veiculos, c
    int capacidade = 10;
    veiculosEncontrados = malloc(capacidade*sizeof(Veiculo*));
 
-   TempoComMs inicio = stringParaTempoComMs(dataInicio);
-   TempoComMs fim = stringParaTempoComMs(dataFim);
+   time_t inicio = stringParaTempo(dataInicio);
+   time_t fim = stringParaTempo(dataFim);
 
    //Evitar duplicados - lista de codVeiculos já adicionados
    int* codsAdicionados = malloc(capacidade*sizeof(int));
    int numCods = 0;
 
    for(Passagem* p = passagens; p!=NULL; p=p->prox){
-        TempoComMs tempoPassagem = stringParaTempoComMs(p->data);
+        time_t tempoPassagem = stringParaTempo(p->data);
 
-        if(tempoPassagem.tempoBase >= inicio.tempoBase && tempoPassagem.tempoBase <= fim.tempoBase){
+        if(tempoPassagem>= inicio && tempoPassagem <= fim){
             //Verificar se o veiculo atual já foi adicionado
             int jaAdicionado = 0;
             for(int i = 0; i< numCods; i++){
@@ -131,18 +131,22 @@ void listarVeiculosPorMatriculaPeriodo(Passagem* passagens, Veiculo* veiculos, c
         }
    }
 
-   qsort(veiculosEncontrados, tamanho, sizeof(Veiculo*), compararPorMatricula);
+   if(tamanho == 0){
+    printf("\nNenhum veículo circulou entre %s e %s.\n", dataInicio, dataFim);
+   }else{
+       qsort(veiculosEncontrados, tamanho, sizeof(Veiculo*), compararPorMatricula);
 
-   //Listar
-   printf("\n--- Veículos que circularam entre %s e %s (ordenados por matrícula) ---\n");
-   for(int i =0; i<tamanho; i++){
-    printf("Matrícula: %s | MArca: %s | Modelo: %s | Ano: %d | Código: %d | NIF: %d\n",
-            veiculosEncontrados[i]->matricula,
-            veiculosEncontrados[i]->marca,
-            veiculosEncontrados[i]->modelo,
-            veiculosEncontrados[i]->ano,
-            veiculosEncontrados[i]->codVeiculo,
-            veiculosEncontrados[i]->dono);
+       //Listar
+       printf("\n--- Veículos que circularam entre %s e %s (ordenados por matrícula) ---\n", dataInicio, dataFim);
+       for(int i =0; i<tamanho; i++){
+        printf("Matrícula: %s | MArca: %s | Modelo: %s | Ano: %d | Código: %d | NIF: %d\n",
+                veiculosEncontrados[i]->matricula,
+                veiculosEncontrados[i]->marca,
+                veiculosEncontrados[i]->modelo,
+                veiculosEncontrados[i]->ano,
+                veiculosEncontrados[i]->codVeiculo,
+                veiculosEncontrados[i]->dono);
+       }
    }
    free(veiculosEncontrados);
    free(codsAdicionados);
@@ -170,6 +174,25 @@ void registarVeiculos(){
 
     novo->prox = veiculos;
     veiculos = novo;
+
+
+    // Escrever no ficheiro
+    FILE* f = fopen("Carros.txt", "a");
+    if (f == NULL) {
+        printf("Erro ao abrir o ficheiro Carros.txt para escrita.\n");
+    return;
+    }
+
+    fprintf(f, "%s\t%s\t%s\t%d\t%d\t%d\n",
+        novo->matricula,
+        novo->marca,
+        novo->modelo,
+        novo->ano,
+        novo->dono,
+        novo->codVeiculo);
+
+    fclose(f);
+
 
     printf("Veículo registado com sucesso! Código: %d\n", novo->codVeiculo);
 }
