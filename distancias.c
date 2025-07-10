@@ -36,7 +36,8 @@ void CarregarDistancias(const char* arquivo) {
 float obterDistanciaEntreSensores(Distancia* distancias, int s1, int s2){
     Distancia* d = distancias;
     while(d){
-        if((d->codSensor1 == s1 && d->codSensor2 == s2)||(d->codSensor1 == s2 && d->codSensor2 == s1)){
+        if((d->codSensor1 == s1 && d->codSensor2 == s2)||
+           (d->codSensor1 == s2 && d->codSensor2 == s1)){
             return d->distancia;
         }
         d = d->prox;
