@@ -58,6 +58,23 @@ void registarPassagem(){
     nova->prox = passagens;
     passagens = nova;
 
+
+    // Escrever no ficheiro
+    FILE* f = fopen("Passagem.txt", "a"); // "a" = append
+    if (f == NULL) {
+        printf("Erro ao abrir o ficheiro Passagem.txt para escrita.\n");
+        return;
+    }
+
+    fprintf(f, "%d\t%d\t%s\t%d\n",
+            nova->idSensor,
+            nova->codVeiculo,
+            nova->data,
+            nova->tipoRegisto);
+
+    fclose(f);
+
+
     printf("Passagem registada com sucesso!\n");
 }
 
@@ -304,6 +321,8 @@ void calcularVelocidadesMedias(Passagem* passagens, Distancia* distancias, Veicu
                                 lista[n].totalHoras = h;
                                 n++;
                             }
+                        }else{
+                            printf("Distância não encontrada entre sensores %d e %d.\n", p->idSensor, s->idSensor);
                         }
                         break;
                     }
@@ -315,8 +334,10 @@ void calcularVelocidadesMedias(Passagem* passagens, Distancia* distancias, Veicu
     printf("\n--- Velocidade média por veículo ---\n");
     for (int i = 0; i < n; i++) {
         Veiculo* v = obterVeiculo(veiculos, lista[i].codVeiculo);
-        if (v && lista[i].totalHoras > 0)
-            printf("Matrícula: %s | Vel. Média: %.2f km/h\n", v->matricula, lista[i].totalKm / lista[i].totalHoras);
+        if (v && lista[i].totalHoras > 0){
+            float velMedia = lista[i].totalKm/lista[i].totalHoras;
+            printf("Matrícula: %s | Vel. Média: %.2f km/h\n", v->matricula, velMedia);
+        }
     }
 }
 
