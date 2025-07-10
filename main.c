@@ -176,7 +176,7 @@ void submenuAnalisesAvancadas() {
         printf("|   0.Voltar ao menu principal              |\n");
         printf("Escolha uma opção: ");
         scanf("%d", &opcao);
-        getchar(); // limpar \n
+        limparBuffer();
 
         switch (opcao) {
             case 1:
@@ -241,8 +241,10 @@ int main(){
 		printf("| 8.Análises Avançadas          |\n");
 		printf("| 9.Memoria Total Ocupada       |\n");
 		printf("| 0.Sair do Programa            |\n");
-		printf("----------------------------\n");
+		printf("\n----------------------------\n");
 		scanf("%d",&op);
+		limparBuffer();
+
 		switch(op){
 			case 1:
 				registarDono();
