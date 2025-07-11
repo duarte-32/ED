@@ -87,7 +87,7 @@ void registarDono(){
         return;
     }
 
-    fprintf(f, "%d\t%s\t%d\n", novo->numContribuinte, novo->nome, novo->codPostal);
+    fprintf(f, "%d\t %s\t %19s\n", novo->numContribuinte, novo->nome, novo->codPostal);
     fclose(f);
     printf("Dono registado com sucesso.\n");
 }
@@ -277,4 +277,118 @@ void subnomeMaisComum(Dono* donos){
 
     printf("Subnome mais comum: %s (ocorrências: %d\n", maisComum, max);
     free(lista);
+}
+
+void velocidadeMediaPorCodigoPostal(Dono* donos, Veiculo* veiculos, Passagem* passagens, Distancia* distancias,
+const char* codPostal, const char* dataInicio, const char* dataFim) {
+    // Funções auxiliares necessárias
+    float encontrarDistancia(Distancia* lista, int sensor1, int sensor2);
+    float calcularDiferencaHoras(const char* data1, const char* data2);
+
+    // Primeiro, contar o número total de donos para alocação
+    int totalDonos = 0;
+    Dono* tempD = donos;
+    while (tempD != NULL) {
+        totalDonos++;
+        tempD = tempD->prox;
+    }
+
+    // Encontrar todos os donos com o código postal especificado
+    int* contribuintes = malloc(totalDonos * sizeof(int));
+    int numDonos = 0;
+
+    Dono* d = donos;
+    while (d != NULL) {
+        if (strcmp(d->codPostal, codPostal) == 0) {
+            contribuintes[numDonos++] = d->numContribuinte;
+        }
+        d = d->prox;
+    }
+
+    if (numDonos == 0) {
+        printf("Nao foram encontrados condutores com codigo postal %s.\n", codPostal);
+        free(contribuintes);
+        return;
+    }
+
+    // Contar o número total de veículos para alocação
+    int totalVeiculos = 0;
+    Veiculo* tempV = veiculos;
+    while (tempV != NULL) {
+        totalVeiculos++;
+        tempV = tempV->prox;
+    }
+
+    // Encontrar todos os veículos desses donos
+    int* codigosVeiculos = malloc(totalVeiculos * sizeof(int));
+    int numVeiculos = 0;
+
+    Veiculo* v = veiculos;
+    while (v != NULL) {
+        for (int i = 0; i < numDonos; i++) {
+            if (v->dono == contribuintes[i]) {
+                codigosVeiculos[numVeiculos++] = v->codVeiculo;
+                break;
+            }
+        }
+        v = v->prox;
+    }
+
+    if (numVeiculos == 0) {
+        printf("Nao foram encontrados veiculos de condutores com codigo postal %s.\n", codPostal);
+        free(contribuintes);
+        free(codigosVeiculos);
+        return;
+    }
+
+    // Calcular velocidade média para esses veículos no período
+    float totalKm = 0.0;
+    float totalHoras = 0.0;
+    int contagem = 0;
+
+    Passagem* entrada = NULL;
+    Passagem* atual = passagens;
+
+    while (atual != NULL) {
+        if (strcmp(atual->data, dataInicio) >= 0 && strcmp(atual->data, dataFim) <= 0) {
+            // Verificar se o veículo está na lista
+            int veiculoValido = 0;
+            for (int i = 0; i < numVeiculos; i++) {
+                if (codigosVeiculos[i] == atual->codVeiculo) {
+                    veiculoValido = 1;
+                    break;
+                }
+            }
+
+            if (veiculoValido) {
+                if (atual->tipoRegisto == 0) { // Entrada
+                    entrada = atual;
+                } else if (atual->tipoRegisto == 1 && entrada != NULL) { // Saída
+                    float distancia = encontrarDistancia(distancias, entrada->idSensor, atual->idSensor);
+                    float horas = calcularDiferencaHoras(entrada->data, atual->data);
+
+                    if (distancia > 0 && horas > 0) {
+                        totalKm += distancia;
+                        totalHoras += horas;
+                        contagem++;
+                    }
+                    entrada = NULL;
+                }
+            }
+        }
+        atual = atual->prox;
+    }
+
+    // Calcular e imprimir velocidade média
+    if (contagem > 0) {
+        float velocidadeMedia = totalKm / totalHoras;
+        printf("A velocidade media dos condutores com codigo postal %s entre %s e %s foi: %.2f km/h\n",
+               codPostal, dataInicio, dataFim, velocidadeMedia);
+        printf("Baseado em %d trajetos analisados.\n", contagem);
+    } else {
+        printf("Nao foram encontrados trajetos para veiculos de condutores com codigo postal %s no periodo especificado.\n", codPostal);
+    }
+
+    free(contribuintes);
+    free(codigosVeiculos);
 }

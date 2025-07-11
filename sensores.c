@@ -14,7 +14,7 @@ void CarregarSensores(const char* arquivo) {
     int codSensor;
     char designacao[100], latitude[50], longitude[50];
 
-    while (fscanf(f, "%d %[^\n] %s %s", &codSensor, designacao, latitude, longitude) == 4) {
+    while (fscanf(f, "%d %[^\n] %49s %49s", &codSensor, designacao, latitude, longitude) == 4) {
         nova = (Sensor*)malloc(sizeof(Sensor));
         nova->codSensor = codSensor;
         strcpy(nova->designacao, designacao);
@@ -32,4 +32,3 @@ void CarregarSensores(const char* arquivo) {
 
     fclose(f);
 }
-

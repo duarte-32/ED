@@ -1,6 +1,6 @@
-
 #include "structs.h"
 #include <locale.h>
+#include <stdio.h>
 
 // Listas vazias globais
 extern Dono *donos;
@@ -79,7 +79,6 @@ void listarDonoSubmenu(){
         }
     }while(opcao != 0);
 
-    return 0;
 }
 
 void listarVeiculoSubmenu(){
@@ -100,8 +99,6 @@ void listarVeiculoSubmenu(){
         }
 
     } while (opcao != 0);
-
-    return 0;
 }
 
 void subMenuAnaliseCirculacao(){
@@ -133,14 +130,14 @@ void subMenuAnaliseCirculacao(){
                 printf("Digite a data de fim (DD-MM-AAAA HH:MM:SS.mmm): ");
                 scanf(" %[^\n]", dataFim);
 
-                listarVeiculosNoPeriodo(veiculos, passagens, dataInicio, dataFim);
+                listarVeiculosPorMatriculaPeriodo(passagens, veiculos, dataInicio, dataFim);
                 break;
             case 2:
                 printf("Digite a data de inicio (DD-MM-AAAA HH:MM:SS.mmm): ");
                 scanf(" %[^\n]", dataInicio);
                 printf("Digite a data de fim (DD-MM-AAAA HH:MM:SS.mmm): ");
                 scanf(" %[^\n]", dataFim);
-                rankingCirculacao(veiculos, passagens, sensores,
+                rankingCirculacao(veiculos, passagens, distancias,
                       dataInicio, dataFim);
                 break;
             case 3:
@@ -149,14 +146,14 @@ void subMenuAnaliseCirculacao(){
                 printf("Digite a data de fim (DD-MM-AAAA HH:MM:SS.mmm): ");
                 scanf(" %[^\n]", dataFim);
                 rankingPorMarca(veiculos, passagens, distancias,
-                    dataInicio, dataFim);
+                dataInicio, dataFim);
                 break;
             case 4:
                 printf("Digite a data de inicio (DD-MM-AAAA HH:MM:SS.mmm): ");
                 scanf(" %[^\n]", dataInicio);
                 printf("Digite a data de fim (DD-MM-AAAA HH:MM:SS.mmm): ");
                 scanf(" %[^\n]", dataFim);
-                listarInfracoesVelocidade(passagens,  veiculos,  sensores,
+                listarInfracoesVelocidade(passagens,  veiculos,  distancias,
                               dataInicio,  dataFim);
                 break;
             case 5:
@@ -165,7 +162,7 @@ void subMenuAnaliseCirculacao(){
                 printf("Digite a data de fim (DD-MM-AAAA HH:MM:SS.mmm): ");
                 scanf(" %[^\n]", dataFim);
                 rankingInfracoesPorVeiculo( passagens,  distancias,  veiculos,
-                                dataInicio, dataFim);
+                dataInicio, dataFim);
                 break;
             case 0:
                 printf("A voltar ao menu principal...\n");
@@ -185,13 +182,12 @@ void submenuAnalisesAvancadas() {
         printf("\n===== Submenu Análises Avançadas =====\n");
         printf("|   1.Listar velocidades médias por veículo\n");
         printf("|   2.Qual a marca mais rápida              |\n");
-        printf("|   3.Qual o dono mais rápido               |\n");
+        printf("|   3.Qual o carro mais rápido               |\n");
         printf("|   4.Velocidade média por código postal    |\n");
         printf("|   5.Marca mais comum                      |\n");
         printf("|   6.Exportar base de dados para CSV       |\n");
         printf("|   7.Exportar base de dados para XML       |\n");
-        printf("|   8.Carro mais rápido                     |\n");
-        printf("|   9.Subnome mais comum dos donos          |\n");
+        printf("|   8.Subnome mais comum dos donos          |\n");
         printf("|   0.Voltar ao menu principal              |\n");
         printf("Escolha uma opção: ");
         scanf("%d", &opcao);
@@ -207,16 +203,16 @@ void submenuAnalisesAvancadas() {
                             dataInicio, dataFim);
                 break;
             case 2:
-                marcaMaisRapida(passagens, distancias, veiculos);
+                marcaMaisRapida(veiculos, passagens, distancias,dataInicio,dataFim);
                 break;
             case 3:
-                donoMaisRapido(passagens, distancias, veiculos, donos);
+                carroMaisRapido(passagens, distancias, veiculos, donos);
                 break;
             case 4:
                 printf("Introduza o código postal: ");
                 fgets(codPostal, sizeof(codPostal), stdin);
                 codPostal[strcspn(codPostal, "\n")] = '\0';
-                mediaPorCodigoPostal(passagens, distancias, veiculos, donos, codPostal);
+                velocidadeMediaPorCodigoPostal(donos,veiculos,passagens,distancias,codPostal,dataInicio,dataFim);
                 break;
             case 5:
                 marcaMaisComum(veiculos);
@@ -228,9 +224,6 @@ void submenuAnalisesAvancadas() {
                 exportarParaXML(donos, veiculos);
                 break;
             case 8:
-                carroMaisRapido(passagens, distancias, veiculos, donos);
-                break;
-            case 9:
                 subnomeMaisComum(donos);
                 break;
             case 0:
@@ -296,7 +289,7 @@ int main(){
                 break;
             case 9:{
                 size_t memoriaTotal = calcularMemoriaTotal(donos, veiculos, sensores, distancias, passagens);
-                printf("Memória total ocupada pelas estruturas de dados: %zu bytes\n", memoriaTotal);
+                printf("Memória total ocupada pelas estruturas de dados: %zu bytes = %0.2lf MB\n", memoriaTotal,(float)memoriaTotal/1000000);
                 break;
             }
 			case 0:

@@ -60,37 +60,10 @@ int proximoCodVeiculo(){
     }
     return max + 1;
 }
-/*
-void pesquisarMatricula() {
-
-    char matricula[10];
-
-    printf("Insira a matricula a pesquisar: \n");
-    scanf("%s", matricula);
 
 
-    Veiculo *atual = veiculos;
-    while (atual != NULL) {
-        if (strcmp(atual->matricula, matricula) == 0) {
-            printf("Matrícula: %s\n", atual->matricula);
-            printf("Marca: %s\n", atual->marca);
-            printf("Modelo: %s\n", atual->modelo);
-            printf("Ano: %d\n", atual->ano);
-            printf("Dono (NIF): %d\n", atual->dono);
-            printf("Código Veículo: %d\n", atual->codVeiculo);
-            printf("-----------------------\n");
 
-            return;
-        }
-
-        atual = atual->prox;
-    }
-
-}
-*/
-
-
-void listarVeiculosNoPeriodo(Veiculo* veiculos, Passagem* passagens, const char* dataInicio, const char* dataFim) {
+void listarVeiculosPorMatriculaPeriodo(Passagem* passagens, Veiculo* veiculos, const char* dataInicio, const char* dataFim) {
     // Contar quantos veículos únicos circularam no período
     int count = 0;
     Passagem* p = passagens;
@@ -192,7 +165,7 @@ void registarVeiculos(){
     printf("NIF do Dono: ");
     scanf("%d", &novo->dono);
 
-    novo->codVeiculo = proximoCodVeiculo;
+    novo->codVeiculo = proximoCodVeiculo();
 
     novo->prox = veiculos;
     veiculos = novo;
@@ -335,7 +308,7 @@ void carroMaisRapido(Passagem* passagens, Distancia* distancias, Veiculo* veicul
     float maxVel = 0;
     int codMax = -1;
     for(int i = 0; i<tamanho; i++){
-        float vel = velocidades[i].totalKm/ velocidades[i].totalHoras;
+        float vel = (float)velocidades[i].totalKm/ velocidades[i].totalHoras;
         if(vel > maxVel){
             maxVel = vel;
             codMax = velocidades[i].codVeiculo;
@@ -355,4 +328,98 @@ void carroMaisRapido(Passagem* passagens, Distancia* distancias, Veiculo* veicul
     }
 
     free(velocidades);
+}
+
+void marcaMaisComum(Veiculo* veiculos) {
+    if (veiculos == NULL) {
+        printf("Lista de veículos vazia.\n");
+        return;
+    }
+
+    MarcaContador* lista = NULL;
+    int tamanho = 0, capacidade = 10;
+
+    // Alocação inicial com verificação
+    lista = malloc(capacidade * sizeof(MarcaContador));
+    if (lista == NULL) {
+        perror("Erro ao alocar memória");
+        return;
+    }
+
+    Veiculo* atual = veiculos;
+    while (atual != NULL) {
+        // Criar cópia da marca para manipulação segura
+        char* copiaMarca = strdup(atual->marca);
+        if (copiaMarca == NULL) {
+            perror("Erro ao duplicar string");
+            free(lista);
+            return;
+        }
+
+        // Extrair o último token (parte da marca)
+        char* ultimoToken = NULL;
+        char* token = strtok(copiaMarca, " ");
+
+        while (token != NULL) {
+            ultimoToken = token;
+            token = strtok(NULL, " ");
+        }
+
+        if (ultimoToken != NULL) {
+            int encontrado = 0;
+
+            // Procurar a marca na lista
+            for (int i = 0; i < tamanho; i++) {
+                if (strcmp(lista[i].marca, ultimoToken) == 0) {
+                    lista[i].total++;
+                    encontrado = 1;
+                    break;
+                }
+            }
+
+            // Se não encontrada, adicionar à lista
+            if (!encontrado) {
+                if (tamanho == capacidade) {
+                    capacidade *= 2;
+                    MarcaContador* temp = realloc(lista, capacidade * sizeof(MarcaContador));
+                    if (temp == NULL) {
+                        perror("Erro ao realocar memória");
+                        free(copiaMarca);
+                        free(lista);
+                        return;
+                    }
+                    lista = temp;
+                }
+
+                strncpy(lista[tamanho].marca, ultimoToken, 49);
+                lista[tamanho].marca[49] = '\0'; // Garantir terminação nula
+                lista[tamanho].total = 1;
+                tamanho++;
+            }
+        }
+
+        free(copiaMarca);
+        atual = atual->prox;
+    }
+
+    // Encontrar e imprimir a marca mais comum
+    if (tamanho == 0) {
+        printf("Nenhuma marca encontrada.\n");
+        free(lista);
+        return;
+    }
+
+    int max = 0;
+    char maisComum[50] = "";
+
+    for (int i = 0; i < tamanho; i++) {
+        if (lista[i].total > max) {
+            max = lista[i].total;
+            strncpy(maisComum, lista[i].marca, 49);
+            maisComum[49] = '\0';
+        }
+    }
+
+    printf("Marca mais comum: %s (ocorrências: %d)\n", maisComum, max);
+    free(lista);
 }

@@ -1,4 +1,4 @@
-#include "Structs.h"
+#include "structs.h"
 #include <time.h>
 
 void limparBuffer() {
@@ -127,25 +127,20 @@ int compararRankingVeiculos(const void* a, const void* b) {
     return ib->numInfracoes - ia->numInfracoes;
 }
 
-float encontrarDistanciaEntreSensores(Sensor* sensores, int idSensor1, int idSensor2) {
-    // Implementação depende de como as distâncias estão armazenadas
-    // Esta é uma versão simplificada - você precisará adaptar
-    Sensor* s1 = sensores;
-    while (s1 != NULL && s1->codSensor != idSensor1) {
-        s1 = s1->prox;
+float encontrarDistanciaEntreSensores(Distancia* distancias, int idSensor1, int idSensor2) {
+    Distancia* atual = distancias;
+
+    while (atual != NULL) {
+        // Verifica se a entrada corresponde aos sensores (em qualquer ordem)
+        if ((atual->codSensor1 == idSensor1 && atual->codSensor2 == idSensor2) ||
+            (atual->codSensor1 == idSensor2 && atual->codSensor2 == idSensor1)) {
+            return atual->distancia;
+        }
+        atual = atual->prox;
     }
 
-    Sensor* s2 = sensores;
-    while (s2 != NULL && s2->codSensor != idSensor2) {
-        s2 = s2->prox;
-    }
-
-    if (s1 != NULL && s2 != NULL) {
-        // Cálculo simplificado da distância (usando coordenadas GPS)
-        // Você deve substituir por sua implementação real
-        return 10.0; // Valor fictício
-    }
-    return -1.0; // Indica que a distância não foi encontrada
+    // Se não encontrou, retorna -1
+    return -1.0;
 }
 
 int compararRankingMarcas(const void* a, const void* b) {
@@ -180,4 +175,3 @@ int compararVelocidadesMedias(const void* a, const void* b) {
     if (va->velocidadeMedia < vb->velocidadeMedia) return 1;
     return 0;
 }
-

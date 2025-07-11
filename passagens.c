@@ -14,7 +14,7 @@ void CarregarPassagens(const char* arquivo) {
     int idSensor, codVeiculo, tipoRegisto;
     char data[30];
 
-    while (fscanf(f, "%d %d %s %d", &idSensor, &codVeiculo, data, &tipoRegisto) == 4) {
+    while (fscanf(f, "%d %d %[^ ] %d", &idSensor, &codVeiculo, data, &tipoRegisto) == 4) {
         nova = (Passagem*)malloc(sizeof(Passagem));
         nova->idSensor = idSensor;
         nova->codVeiculo = codVeiculo;
@@ -60,7 +60,7 @@ void registarPassagem(){
 
 
     // Escrever no ficheiro
-    FILE* f = fopen("Passagem.txt", "a"); // "a" = append
+    FILE* f = fopen("passagem.txt", "a"); // "a" = append
     if (f == NULL) {
         printf("Erro ao abrir o ficheiro Passagem.txt para escrita.\n");
         return;
@@ -80,7 +80,7 @@ void registarPassagem(){
 
 
 
-void rankingCirculacao(Veiculo* veiculos, Passagem* passagens, Sensor* sensores,
+void rankingCirculacao(Veiculo* veiculos, Passagem* passagens, Distancia* distancias,
                       const char* dataInicio, const char* dataFim) {
     // Fase 1: Contar veículos únicos no período
     int numVeiculos = 0;
@@ -143,7 +143,7 @@ void rankingCirculacao(Veiculo* veiculos, Passagem* passagens, Sensor* sensores,
                     entrada = atual;
                 } else if (atual->tipoRegisto == 1 && entrada != NULL) { // Saída
                     // Calcular distância entre os sensores
-                    float distancia = encontrarDistanciaEntreSensores(sensores, entrada->idSensor, atual->idSensor);
+                    float distancia = encontrarDistanciaEntreSensores(distancias, entrada->idSensor, atual->idSensor);
                     if (distancia > 0) {
                         ranking[i].kmTotal += distancia;
                     }
@@ -271,7 +271,7 @@ void rankingPorMarca(Veiculo* veiculos, Passagem* passagens, Distancia* distanci
 }
 
 
-void listarInfracoesVelocidade(Passagem* passagens, Veiculo* veiculos, Sensor* sensores,
+void listarInfracoesVelocidade(Passagem* passagens, Veiculo* veiculos, Distancia* distancias,
                               const char* dataInicio, const char* dataFim) {
     // Fase 1: Contar número total de passagens para dimensionar arrays
     int totalPassagens = 0;
@@ -322,7 +322,7 @@ void listarInfracoesVelocidade(Passagem* passagens, Veiculo* veiculos, Sensor* s
     int numInfracoes = 0;
 
     for (int i = 0; i < numPares; i++) {
-        float distancia = encontrarDistanciaEntreSensores(sensores, sensoresEntrada[i], sensoresSaida[i]);
+        float distancia = encontrarDistanciaEntreSensores(distancias, sensoresEntrada[i], sensoresSaida[i]);
         float horas = calcularDiferencaHoras(datasEntrada[i], datasSaida[i]);
 
         if (distancia > 0 && horas > 0) {
@@ -564,59 +564,6 @@ void listarVelocidadesMedias(Passagem* passagens, Distancia* distancias, Veiculo
     free(velocidades);
 }
 
-void marcaMaisRapida(Passagem* passagens, Distancia* distancias, Veiculo* veiculos) {
-    MarcaVelocidade lista[100];
-    int n = 0;
-
-    for (Passagem* p = passagens; p; p = p->prox) {
-        if (p->tipoRegisto == 0) {
-            for (Passagem* s = p->prox; s; s = s->prox) {
-                if (s->codVeiculo == p->codVeiculo && s->tipoRegisto == 1) {
-                    double h = difftime(stringParaTempo(s->data), stringParaTempo(p->data)) / 3600.0;
-                    if (h > 0) {
-                        float dist = obterDistanciaEntreSensores(distancias, p->idSensor, s->idSensor);
-                        if (dist >= 0) {
-                            Veiculo* v = obterVeiculo(veiculos, p->codVeiculo);
-                            if (v) {
-                                int i, found = 0;
-                                for (i = 0; i < n; i++) {
-                                    if (strcmp(lista[i].marca, v->marca) == 0) {
-                                        lista[i].totalKm += dist;
-                                        lista[i].totalHoras += h;
-                                        found = 1;
-                                        break;
-                                    }
-                                }
-                                if (!found) {
-                                    strcpy(lista[n].marca, v->marca);
-                                    lista[n].totalKm = dist;
-                                    lista[n].totalHoras = h;
-                                    n++;
-                                }
-                            }
-                        }
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
-    int max = -1;
-    float vmax = 0.0;
-    for (int i = 0; i < n; i++) {
-        float vm = lista[i].totalKm / lista[i].totalHoras;
-        if (vm > vmax) {
-            vmax = vm;
-            max = i;
-        }
-    }
-
-    if (max != -1)
-        printf("Marca mais rápida: %s (%.2f km/h)\n", lista[max].marca, vmax);
-}
-
-
 void donoMaisRapido(Passagem* passagens, Distancia* distancias, Veiculo* veiculos, Dono* donos) {
     DonoVelocidade lista[500];
     int n = 0;
@@ -712,33 +659,118 @@ void mediaPorCodigoPostal(Passagem* passagens, Distancia* distancias, Veiculo* v
 }
 
 
+void marcaMaisRapida(Veiculo* veiculos, Passagem* passagens, Distancia* distancias, const char* dataInicio, const char* dataFim) {
+    // Funções auxiliares necessárias
+    Veiculo* encontrarVeiculoPorCodigo(Veiculo* lista, int codigo);
+    float encontrarDistancia(Distancia* lista, int sensor1, int sensor2);
+    float calcularDiferencaHoras(const char* data1, const char* data2);
 
-void marcaMaisComum(Veiculo* veiculos) {
-    MarcaContador marcas[100];
-    int n = 0;
+    // Primeiro, contar o número total de veículos para alocação
+    int totalVeiculos = 0;
+    Veiculo* tempV = veiculos;
+    while (tempV != NULL) {
+        totalVeiculos++;
+        tempV = tempV->prox;
+    }
 
-    for (Veiculo* v = veiculos; v; v = v->prox) {
-        int i, found = 0;
-        for (i = 0; i < n; i++) {
-            if (strcmp(marcas[i].marca, v->marca) == 0) {
-                marcas[i].total++;
-                found = 1;
+    // Coletar todas as marcas únicas
+    char** marcas = NULL;
+    int numMarcas = 0;
+
+    // Alocar espaço inicial
+    marcas = malloc(totalVeiculos * sizeof(char*));
+    for (int i = 0; i < totalVeiculos; i++) {
+        marcas[i] = malloc(50 * sizeof(char));
+    }
+
+    // Coletar marcas únicas
+    Veiculo* v = veiculos;
+    while (v != NULL) {
+        int encontrada = 0;
+        for (int i = 0; i < numMarcas; i++) {
+            if (strcmp(marcas[i], v->marca) == 0) {
+                encontrada = 1;
                 break;
             }
         }
-        if (!found) {
-            strcpy(marcas[n].marca, v->marca);
-            marcas[n].total = 1;
-            n++;
+        if (!encontrada) {
+            strcpy(marcas[numMarcas++], v->marca);
+        }
+        v = v->prox;
+    }
+
+    // Calcular velocidade média para cada marca
+    float* velocidadesMedias = malloc(numMarcas * sizeof(float));
+    int* contagens = malloc(numMarcas * sizeof(int));
+
+    for (int i = 0; i < numMarcas; i++) {
+        velocidadesMedias[i] = 0.0;
+        contagens[i] = 0;
+    }
+
+    // Processar todas as passagens no período
+    Passagem* entrada = NULL;
+    Passagem* atual = passagens;
+
+    while (atual != NULL) {
+        if (strcmp(atual->data, dataInicio) >= 0 && strcmp(atual->data, dataFim) <= 0) {
+            if (atual->tipoRegisto == 0) { // Entrada
+                entrada = atual;
+            } else if (atual->tipoRegisto == 1 && entrada != NULL) { // Saída
+                Veiculo* veiculo = encontrarVeiculoPorCodigo(veiculos, atual->codVeiculo);
+                if (veiculo != NULL) {
+                    // Encontrar índice da marca
+                    int idxMarca = -1;
+                    for (int i = 0; i < numMarcas; i++) {
+                        if (strcmp(marcas[i], veiculo->marca) == 0) {
+                            idxMarca = i;
+                            break;
+                        }
+                    }
+
+                    if (idxMarca >= 0) {
+                        float distancia = encontrarDistancia(distancias, entrada->idSensor, atual->idSensor);
+                        float horas = calcularDiferencaHoras(entrada->data, atual->data);
+
+                        if (distancia > 0 && horas > 0) {
+                            velocidadesMedias[idxMarca] += distancia / horas;
+                            contagens[idxMarca]++;
+                        }
+                    }
+                }
+                entrada = NULL;
+            }
+        }
+        atual = atual->prox;
+    }
+
+    // Calcular médias e encontrar a maior
+    float maiorVelocidade = 0.0;
+    char marcaMaisRapida[50] = "";
+
+    for (int i = 0; i < numMarcas; i++) {
+        if (contagens[i] > 0) {
+            velocidadesMedias[i] /= contagens[i];
+            if (velocidadesMedias[i] > maiorVelocidade) {
+                maiorVelocidade = velocidadesMedias[i];
+                strcpy(marcaMaisRapida, marcas[i]);
+            }
         }
     }
 
-    int max = 0;
-    for (int i = 1; i < n; i++) {
-        if (marcas[i].total > marcas[max].total)
-            max = i;
+    // Imprimir resultado
+    if (maiorVelocidade > 0) {
+        printf("A marca que circulou a maior velocidade media (%.2f km/h) entre %s e %s foi: %s\n",
+               maiorVelocidade, dataInicio, dataFim, marcaMaisRapida);
+    } else {
+        printf("Nao foram encontrados dados de velocidade para o periodo especificado.\n");
     }
 
-    printf("Marca mais comum: %s (%d veículos)\n", marcas[max].marca, marcas[max].total);
+    // Liberar memória
+    for (int i = 0; i < totalVeiculos; i++) {
+        free(marcas[i]);
+    }
+    free(marcas);
+    free(velocidadesMedias);
+    free(contagens);
 }
-

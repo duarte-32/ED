@@ -104,11 +104,13 @@ typedef struct {
     char modelo[50];
 } VeiculoPeriodo;
 
+//Interface
 size_t calcularMemoriaTotal(Dono* donos, Veiculo* veiculos, Sensor* sensores, Distancia* distancias, Passagem* passagens);
 void listarDonoSubmenu();
 void listarVeiculoSubmenu();
 void subMenuAnaliseCirculacao();
 
+//donos
 void CarregarDonos(const char* arquivo);
 void ListarDonos();
 void registarDono();
@@ -117,7 +119,10 @@ void listarCondutoresPorContribuinte(Dono* listaDonos);
 void exportarParaCSV(Dono* donos, Veiculo* veiculos, Sensor* sensores, Passagem* passagens);
 void exportarParaXML(Dono* donos, Veiculo* veiculos);
 void subnomeMaisComum(Dono* donos);
+void velocidadeMediaPorCodigoPostal(Dono* donos, Veiculo* veiculos, Passagem* passagens, Distancia* distancias,
+const char* codPostal, const char* dataInicio, const char* dataFim);
 
+//veiculos
 void CarregarVeiculos(const char* arquivo);
 void ListarVeiculos();
 int proximoCodVeiculo();
@@ -126,20 +131,25 @@ void listarVeiculosPorMatriculaPeriodo(Passagem* passagens, Veiculo* veiculos, c
 void listarVeiculosOrdenados(Veiculo* listaVeiculos, int criterio);
 Veiculo* obterVeiculo(Veiculo* lista, int cod);
 void carroMaisRapido(Passagem* passagens, Distancia* distancias, Veiculo* veiculos, Dono* donos);
+void marcaMaisComum(Veiculo* veiculos);
 
+//sensores & distancias
 void CarregarSensores(const char* arquivo);
 void CarregarDistancias(const char* arquivo);
 float obterDistanciaEntreSensores(Distancia* distancias, int s1, int s2);
 
+//passagens
 void CarregarPassagens(const char* arquivo);
 void registarPassagem();
-void rankingCirculacao(Veiculo* veiculos, Passagem* passagens, Sensor* sensores,const char* dataInicio, const char* dataFim);
+void rankingCirculacao(Veiculo* veiculos, Passagem* passagens, Distancia* distancias,const char* dataInicio, const char* dataFim);
 void rankingPorMarca(Veiculo* veiculos, Passagem* passagens, Distancia* distancias,const char* dataInicio, const char* dataFim);
-void listarInfracoesVelocidade(Passagem* passagens, Veiculo* veiculos, Sensor* sensores, const char* dataInicio, const char* dataFim);
+void listarInfracoesVelocidade(Passagem* passagens, Veiculo* veiculos, Distancia* distancias,const char* dataInicio, const char* dataFim);
 void rankingInfracoesPorVeiculo(Passagem* passagens, Distancia* distancias, Veiculo* veiculos, const char* dataInicio, const char* dataFim);
 void listarVelocidadesMedias(Passagem* passagens, Distancia* distancias, Veiculo* veiculos, const char* dataInicio, const char* dataFim);
+void marcaMaisRapida(Veiculo* veiculos, Passagem* passagens, Distancia* distancias, const char* dataInicio, const char* dataFim);
 
 
+//auxiliares
 void limparBuffer();
 int compararNomes (const void* a, const void* b);
 int compararContribuintes(const void* a, const void* b);
@@ -152,11 +162,9 @@ Veiculo* encontrarVeiculoPorCodigo(Veiculo* veiculos, int codVeiculo);
 Dono* encontrarDonoPorContribuinte(Dono* donos, int numContribuinte);
 float encontrarDistancia(Distancia* distancias, int sensor1, int sensor2);
 int compararRankingVeiculos(const void* a, const void* b);
-float encontrarDistanciaEntreSensores(Sensor* sensores, int idSensor1, int idSensor2);
+float encontrarDistanciaEntreSensores(Distancia* distancias, int idSensor1, int idSensor2);
 int compararRankingMarcas(const void* a, const void* b);
 int compararInfracoes(const void* a, const void* b);
 Veiculo* encontrarVeiculoPorMatricula(Veiculo* veiculos, const char* matricula);
 int compararVelocidadesMedias(const void* a, const void* b);
-int compararVelocidadesMedias(const void* a, const void* b);
 #endif
-
